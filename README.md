@@ -5,6 +5,12 @@ FTTR APs, read from the AC Web UI.
 
 Requires Home Assistant `2026.9.0` or newer.
 
+Development, releases and issue tracking live on GitHub:
+[RLTechGlobal/HomeAssistant-RLTech](https://github.com/RLTechGlobal/HomeAssistant-RLTech).
+
+This integration is part of the [RLTech](https://www.rltechnet.com) FTTR
+all-optical networking product line.
+
 Everything essential comes from the AC Web UI on port `8080`: AP list, AP
 details, Wi-Fi clients and the AC status pages. Two optional enhancements need
 the AC's LAN address to be reachable from Home Assistant:
@@ -690,8 +696,26 @@ Nothing is changed on the AC.
 | A client table card shows "Administrator access is required" | The dashboard user is not a Home Assistant administrator; client data is admin-only. |
 | Something else | Download the diagnostics (entry menu > **Download diagnostics**; addresses, MACs, serials and secrets are removed) and enable debug logging for `custom_components.rltech_fttr`. |
 
+## Support
+
+Report issues on GitHub:
+[RLTechGlobal/HomeAssistant-RLTech/issues](https://github.com/RLTechGlobal/HomeAssistant-RLTech/issues).
+Attach a diagnostics download (entry menu > **Download diagnostics**) so the
+report can be triaged without exposing addresses, MACs, serials or secrets.
+
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE). This integration is based on
 [ha-rltech-fttr](https://github.com/hmsta/ha-rltech-fttr) by hmsta, used under
 the MIT License; see [NOTICE](NOTICE) and [LICENSE-MIT](LICENSE-MIT).
+
+## About RLTech
+
+RLTech builds all-optical FTTR (Fiber To The Room) networking for homes and
+SMB sites: main/slave gateways, ONTs, ACs, APs and switches, with local
+management options such as this Home Assistant integration alongside cloud
+platforms.
+
+- Website: [www.rltechnet.com](https://www.rltechnet.com)
+- GitHub: [RLTechGlobal/HomeAssistant-RLTech](https://github.com/RLTechGlobal/HomeAssistant-RLTech)
+- Product and network management cloud: [AVASA](https://avasa.net)
