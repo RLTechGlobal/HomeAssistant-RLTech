@@ -1,5 +1,9 @@
 # RLTech FTTR Home Assistant integration
 
+First and foremost, I would like to express my sincere gratitude to Michael Patzer,
+this project would not exist without him, as he provided the initial requirements 
+and the baseline code.
+
 Custom integration for the RLTech FTTR AC (OLT/controller) and its managed
 FTTR APs, read from the AC Web UI.
 
