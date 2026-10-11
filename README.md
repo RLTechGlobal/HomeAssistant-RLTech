@@ -1,6 +1,6 @@
 # RLTech FTTR Home Assistant integration
 
-First and foremost, I would like to express my sincere gratitude to Michael Patzer,
+First and foremost, I would like to express my sincere gratitude to Michael,
 this project would not exist without him, as he provided the initial requirements 
 and the baseline code.
 
