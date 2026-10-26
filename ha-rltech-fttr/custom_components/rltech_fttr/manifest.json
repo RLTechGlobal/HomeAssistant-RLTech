@@ -12,9 +12,9 @@
     "lovelace",
     "panel_custom"
   ],
-  "documentation": "https://github.com/RLTechGlobal/HomeAssistant-RLTech",
+  "documentation": "https://github.com/RLTechGlobal/ha-rltech-fttr",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/RLTechGlobal/HomeAssistant-RLTech/issues",
+  "issue_tracker": "https://github.com/RLTechGlobal/ha-rltech-fttr/issues",
   "loggers": [
     "aiooui"
   ],

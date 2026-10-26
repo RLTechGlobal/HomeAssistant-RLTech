@@ -1,5 +1,8 @@
 # Running the tests
 
+Run every command below from this integration directory (`ha-rltech-fttr/`),
+which is the repository root once the directory is published on its own.
+
 The same test suite runs in two environments.
 
 ## 1. Plain Python (any 3.12+), no Home Assistant

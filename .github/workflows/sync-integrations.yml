@@ -1,0 +1,87 @@
+name: Sync integration repositories
+
+# HACS needs one integration per repository with hacs.json at that repository's
+# root, so each ha-*/ directory here is mirrored to its own public repository.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ha-*/**"
+      - ".github/workflows/sync-integrations.yml"
+      - "LICENSE"
+      - "LICENSE-MIT"
+      - "NOTICE"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-integrations
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: ha-rltech-fttr
+            domain: rltech_fttr
+            repo: ha-rltech-fttr
+            name: RLTech FTTR
+    name: Sync ${{ matrix.dir }}
+    env:
+      INTEGRATION_DIR: ${{ matrix.dir }}
+      INTEGRATION_DOMAIN: ${{ matrix.domain }}
+      INTEGRATION_NAME: ${{ matrix.name }}
+      PUBLISHED_REPO: ${{ matrix.repo }}
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+
+      - name: Check out the published repository
+        uses: actions/checkout@v4
+        with:
+          repository: RLTechGlobal/${{ matrix.repo }}
+          path: published
+          token: ${{ secrets.HACS_SYNC_TOKEN }}
+
+      - name: Mirror the integration directory
+        working-directory: published
+        run: |
+          set -eu
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r "../${INTEGRATION_DIR}"/. .
+          cp ../LICENSE ../LICENSE-MIT ../NOTICE ../.gitignore .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Sync ${INTEGRATION_DIR} from ${GITHUB_SHA:0:7}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+        id: sync
+
+      - name: Push
+        if: steps.sync.outputs.changed == 'true'
+        working-directory: published
+        run: git push
+
+      - name: Tag the published version
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          set -eu
+          version="$(jq -r .version "${INTEGRATION_DIR}/custom_components/${INTEGRATION_DOMAIN}/manifest.json")"
+          cd published
+          if git ls-remote --exit-code --tags origin "refs/tags/v${version}" >/dev/null 2>&1; then
+            echo "v${version} is already published"
+          else
+            git tag -a "v${version}" -m "${INTEGRATION_NAME} ${version}"
+            git push origin "refs/tags/v${version}"
+          fi
