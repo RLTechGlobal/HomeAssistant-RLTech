@@ -2,60 +2,86 @@
 
 Monorepo for the RLTech Home Assistant custom integrations.
 
-Each integration lives in its own top-level directory and is a complete,
-self-contained HACS repository: its own `hacs.json`, `custom_components/`,
-tests, screenshots and README.
+Each integration lives in its own top-level `ha-*/` directory with its own
+`hacs.json`, `custom_components/<domain>/` and README, so the directory can be
+published as a HACS repository on its own.
 
-| Directory | Integration | Requires Home Assistant | HACS repository |
-|---|---|---|---|
-| [`ha-rltech-fttr/`](ha-rltech-fttr/README.md) | RLTech FTTR (AC/OLT + managed FTTR APs) | 2026.9.0 | [RLTechGlobal/ha-rltech-fttr](https://github.com/RLTechGlobal/ha-rltech-fttr) |
-| [`ha-snmp-switch-manager/`](ha-snmp-switch-manager/README.md) | SNMP Switch Manager (fork, RLTech switches) | see its README | not published yet |
+| Directory | Integration | Requires Home Assistant | License | HACS repository |
+|---|---|---|---|---|
+| [`ha-rltech-fttr/`](ha-rltech-fttr/README.md) | RLTech FTTR (AC/OLT + managed FTTR APs) | 2026.9.0 | Apache-2.0 (see [License](#license)) | [RLTechGlobal/ha-rltech-fttr](https://github.com/RLTechGlobal/ha-rltech-fttr) |
+| [`ha-snmp-switch-manager/`](ha-snmp-switch-manager/README.md) | SNMP Switch Manager, forked with RLTech switch support | 2025.11.2 | MIT ([its own `LICENSE`](ha-snmp-switch-manager/LICENSE)) | not published yet |
 
-## Forked integrations
+## Forked integration: `ha-snmp-switch-manager/`
 
-`ha-snmp-switch-manager/` is a fork of
-[OtisPresley/snmp-switch-manager](https://github.com/OtisPresley/snmp-switch-manager)
-(MIT License, Copyright (c) 2025 OtisPresley; the original `LICENSE` is kept in
-that directory and applies to it).
+A fork of
+[OtisPresley/snmp-switch-manager](https://github.com/OtisPresley/snmp-switch-manager),
+a generic SNMP switch integration, extended to manage RLTech switches.
+
+### Fork point
 
 | Item | Value |
 |---|---|
 | Upstream repository | https://github.com/OtisPresley/snmp-switch-manager |
 | Upstream branch | `main` |
-| Upstream commit forked | [`138a0d45ffeb8b0f4918404d1da743e5ce194b21`](https://github.com/OtisPresley/snmp-switch-manager/commit/138a0d45ffeb8b0f4918404d1da743e5ce194b21) (2026-10-24, version 0.6.10) |
+| Upstream commit | [`138a0d45ffeb8b0f4918404d1da743e5ce194b21`](https://github.com/OtisPresley/snmp-switch-manager/commit/138a0d45ffeb8b0f4918404d1da743e5ce194b21) (2026-10-24) |
+| Upstream version | 0.6.10 |
+| Import commit in this repository | `ad2adee` — an unmodified copy of the upstream commit |
 
-The first commit that adds the directory is an unmodified copy of that upstream
-commit, so `git diff <that commit> -- ha-snmp-switch-manager/` shows exactly what
-RLTech changed. To pick up a newer upstream release, diff the upstream commits
-since the one above and apply them to this directory.
+Because the import commit is unmodified upstream code, this shows every RLTech
+change:
 
-### RLTech changes on top of the fork point
+```sh
+git diff ad2adee HEAD -- ha-snmp-switch-manager/
+```
 
-Ported from the RLTech development branch `feat/rltech-snmp` of the local
-snmp-switch-manager clone (commit `bb9ea8d`; the later `b6da90b` and its revert
-`f1db0c1` cancel out, so the net change is `bb9ea8d` alone). That branch was
-based on upstream `9ac4ebe`; the upstream commits between `9ac4ebe` and
-`138a0d4` (README, `manifest.json` documentation URL, `github.py` refactor)
-touch nothing the RLTech changes touch, so the port applied without conflicts.
+To pick up a newer upstream release, apply the upstream changes since the fork
+point to this directory, then update the table above.
 
-- RLTech switch detection by sysObjectID prefix `1.3.6.1.4.1.62570`, with the
-  `en8851` / `an8858` sysDescr keywords as a fallback; built-in vendor entries
-  (`database_builtin.py`) survive automatic database updates; earlier
-  "Airoha" entries and options are migrated to RLTech.
-- Optional SNMP v2c write community for all SET requests.
-- *Save Configuration* button, `snmp_switch_manager.save_config` service and
-  save status / last save sensors (RLTECH-MW-MIB `rltMwCfgSaveAction`).
-- Validation of system name and port descriptions against what the RLTech
-  firmware accepts.
-- sysObjectID prefixes matched on OID arc boundaries.
-- Configurable database updater source (`const.py`).
-- `mibs/RLTECH-SMI.mib` and `mibs/RLTECH-MW-MIB.mib`.
+### RLTech changes
 
-Details are in `ha-snmp-switch-manager/CHANGELOG.md` under *Unreleased*.
+- **RLTech switch detection:** switches are detected by the sysObjectID prefix
+  `1.3.6.1.4.1.62570`. The `en8851` / `an8858` keywords in sysDescr are a
+  fallback.
+- **Built-in vendor entries:** the entries in `database_builtin.py` survive
+  automatic database updates.
+- **Migration:** earlier "Airoha" database entries and options are migrated to
+  RLTech.
+- **Write community:** an optional SNMP v2c write community is used for all SET
+  requests. When it is empty, SET requests use the read community.
+- **Save configuration:** a *Save Configuration* button and the
+  `snmp_switch_manager.save_config` service write the running configuration to
+  flash through RLTECH-MW-MIB `rltMwCfgSaveAction`. Two diagnostic sensors show
+  the save status and the last save time.
+- **Input validation:** the system name and port descriptions are checked
+  against what the RLTech firmware accepts before the SET is sent.
+- **sysObjectID matching:** prefixes are matched on OID arc boundaries, so
+  `1.3.6.1.4.1.9` no longer matches `1.3.6.1.4.1.99…`.
+- **Database updater source:** the source repository is configurable in
+  `const.py`. The default is still upstream.
+- **MIB files:**
+  [`mibs/RLTECH-SMI.mib`](ha-snmp-switch-manager/mibs/RLTECH-SMI.mib) and
+  [`mibs/RLTECH-MW-MIB.mib`](ha-snmp-switch-manager/mibs/RLTECH-MW-MIB.mib).
 
-It is not in the sync workflow matrix yet: the workflow copies the root
-`LICENSE`, `LICENSE-MIT` and `NOTICE` into the published repository, which would
-replace this fork's own MIT `LICENSE`, so that step needs adjusting first.
+Details are in
+[`ha-snmp-switch-manager/CHANGELOG.md`](ha-snmp-switch-manager/CHANGELOG.md)
+under *Unreleased*.
+
+### Before publishing it
+
+Before it is published, the directory needs these changes:
+
+1. **License:** the sync workflow copies the root `LICENSE`, `LICENSE-MIT` and
+   `NOTICE` into the published repository, which would overwrite this fork's
+   MIT `LICENSE`. The copy step must skip this directory, or the license
+   notices must be combined.
+2. **Links:** the documentation and issue tracker URLs in
+   `custom_components/snmp_switch_manager/manifest.json` and the links in its
+   README still point at upstream.
+3. **Database updater:** the updater source in `const.py` still points at
+   upstream.
+4. **Workflows:** the upstream `.github/` workflows (CI, hassfest, HACS
+   validation, PR automation) come with the directory. Review them, because
+   they will run in the published repository.
 
 ## Why the extra repository per integration
 
@@ -65,9 +91,12 @@ this monorepo cannot be added to HACS directly.
 
 Write code here; publish it from there. The
 [Sync integration repositories](.github/workflows/sync-integrations.yml)
-workflow mirrors each integration directory into its own repository on every
-push to `main`, and tags the published repository with the version from that
-integration's `manifest.json`.
+workflow does the publishing on every push to `main`:
+
+- It mirrors each integration directory listed in its matrix into that
+  integration's own repository.
+- It tags the published repository with the version from the integration's
+  `manifest.json`.
 
 | What | Where |
 |---|---|
@@ -111,12 +140,20 @@ python3 -m venv .venv
 See [`ha-rltech-fttr/tests/README.md`](ha-rltech-fttr/tests/README.md) for the
 Home Assistant runtime and frontend checks.
 
+`ha-snmp-switch-manager/` has no Python test suite; upstream checks it with the
+hassfest and HACS validation workflows under its `.github/workflows/`.
+
 ## License
 
-Licensed under the Apache License 2.0 ([LICENSE](LICENSE)); see
-[NOTICE](NOTICE) and [LICENSE-MIT](LICENSE-MIT) for the MIT-licensed baseline
-this work is based on. These three files are copied into each published
-integration repository.
+The repository is licensed under the Apache License 2.0 ([LICENSE](LICENSE)).
+This applies to everything except `ha-snmp-switch-manager/`.
+
+- **`ha-rltech-fttr/`:** based on an MIT-licensed baseline, described in
+  [NOTICE](NOTICE) and [LICENSE-MIT](LICENSE-MIT). The sync workflow copies
+  `LICENSE`, `NOTICE` and `LICENSE-MIT` into its published repository.
+- **`ha-snmp-switch-manager/`:** stays under its upstream MIT License,
+  Copyright (c) 2025 OtisPresley. See
+  [`ha-snmp-switch-manager/LICENSE`](ha-snmp-switch-manager/LICENSE).
 
 ## About RLTech
 
