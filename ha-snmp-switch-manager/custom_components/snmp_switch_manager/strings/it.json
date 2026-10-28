@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "Community SNMP (RW per scrivere alias)"
+          "community": "Community SNMP (RW per scrivere alias)",
+          "write_community": "Community SNMP di scrittura (opzionale; per attivare/disattivare porte, alias e altre scritture — vuota = community sopra)"
         },
         "description": "Fornisci la community SNMP v2c.\n\nSe vedi un errore di autenticazione, verifica la stringa community sul dispositivo.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "Versione SNMP",
           "override_community": "SNMP v2c — Override community (opzionale)",
+          "write_community": "SNMP v2c — Community di scrittura (opzionale; per le richieste SET. Vuota = valore della configurazione iniziale, altrimenti community di lettura)",
+          "clear_write_community": "SNMP v2c — Rimuovi la community di scrittura della configurazione iniziale (SET userà la community di lettura)",
           "override_port": "SNMP v2c — Override porta (opzionale)",
           "uptime_poll_interval": "Intervallo di aggiornamento uptime (secondi)",
           "snmpv3_username": "SNMP v3 — Nome utente (opzionale)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Attributi (senza cronologia)",
         "sensors": "Sensori (cronologia)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Salva configurazione",
+      "description": "Scrive la configurazione in esecuzione di uno switch RLTech nella memoria flash (come \"Salva\" nell'interfaccia web dello switch). Le modifiche fatte via SNMP vanno perse al riavvio finché non vengono salvate. Al massimo un salvataggio ogni 10 secondi e 30 all'ora.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo switch",
+          "description": "Lo switch RLTech di cui salvare la configurazione"
+        },
+        "wait": {
+          "name": "Attendi il completamento",
+          "description": "Attende che lo switch confermi la scrittura della configurazione in flash (altrimenti ritorna appena la richiesta è accettata)."
+        }
       }
     }
   },

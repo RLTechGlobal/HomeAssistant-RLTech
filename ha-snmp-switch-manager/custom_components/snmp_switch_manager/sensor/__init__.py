@@ -59,6 +59,13 @@ from .poe import (
     PoEHealthStatusSensor,
 )
 from .info import SimpleTextSensor, DeviceInformationSensor
+from .cfgsave import (
+    CFGSAVE_LAST_UID,
+    CFGSAVE_STATUS_UID,
+    ConfigLastSavedSensor,
+    ConfigSaveStatusSensor,
+)
+from ..button import cfgsave_entity_plan
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -108,6 +115,16 @@ async def async_setup_entry(hass, entry, async_add_entities):
         eid = ent_reg.async_get_entity_id("sensor", DOMAIN, unique_id)
         if eid:
             ent_reg.async_remove(eid)
+
+    # RLTech save-configuration diagnostics (status + last saved time); the
+    # "-cfgsave-" unique_id prefix stays clear of the -bw- / -env- cleanups.
+    # Removed only when support is confirmed absent; kept (unavailable) after
+    # a transient probe failure, see button.cfgsave_entity_plan().
+    if cfgsave_entity_plan(
+        hass, client, "sensor", [f"{entry.entry_id}-{CFGSAVE_STATUS_UID}", f"{entry.entry_id}-{CFGSAVE_LAST_UID}"]
+    ):
+        entities.append(ConfigSaveStatusSensor(coordinator, entry, device_info, host_label, client))
+        entities.append(ConfigLastSavedSensor(coordinator, entry, device_info, host_label, client))
 
     # Bandwidth sensor entities (optional; per-device)
     ent_reg = er.async_get(hass)

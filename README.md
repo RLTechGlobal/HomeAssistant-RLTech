@@ -29,6 +29,30 @@ commit, so `git diff <that commit> -- ha-snmp-switch-manager/` shows exactly wha
 RLTech changed. To pick up a newer upstream release, diff the upstream commits
 since the one above and apply them to this directory.
 
+### RLTech changes on top of the fork point
+
+Ported from the RLTech development branch `feat/rltech-snmp` of the local
+snmp-switch-manager clone (commit `bb9ea8d`; the later `b6da90b` and its revert
+`f1db0c1` cancel out, so the net change is `bb9ea8d` alone). That branch was
+based on upstream `9ac4ebe`; the upstream commits between `9ac4ebe` and
+`138a0d4` (README, `manifest.json` documentation URL, `github.py` refactor)
+touch nothing the RLTech changes touch, so the port applied without conflicts.
+
+- RLTech switch detection by sysObjectID prefix `1.3.6.1.4.1.62570`, with the
+  `en8851` / `an8858` sysDescr keywords as a fallback; built-in vendor entries
+  (`database_builtin.py`) survive automatic database updates; earlier
+  "Airoha" entries and options are migrated to RLTech.
+- Optional SNMP v2c write community for all SET requests.
+- *Save Configuration* button, `snmp_switch_manager.save_config` service and
+  save status / last save sensors (RLTECH-MW-MIB `rltMwCfgSaveAction`).
+- Validation of system name and port descriptions against what the RLTech
+  firmware accepts.
+- sysObjectID prefixes matched on OID arc boundaries.
+- Configurable database updater source (`const.py`).
+- `mibs/RLTECH-SMI.mib` and `mibs/RLTECH-MW-MIB.mib`.
+
+Details are in `ha-snmp-switch-manager/CHANGELOG.md` under *Unreleased*.
+
 It is not in the sync workflow matrix yet: the workflow copies the root
 `LICENSE`, `LICENSE-MIT` and `NOTICE` into the published repository, which would
 replace this fork's own MIT `LICENSE`, so that step needs adjusting first.

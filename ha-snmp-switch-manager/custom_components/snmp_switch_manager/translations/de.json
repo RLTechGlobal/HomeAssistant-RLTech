@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "SNMP-Community (RW für Alias-Schreibzugriffe)"
+          "community": "SNMP-Community (RW für Alias-Schreibzugriffe)",
+          "write_community": "SNMP-Schreib-Community (optional; für Port ein/aus, Alias und andere Schreibzugriffe — leer = obige Community)"
         },
         "description": "SNMP v2c-Community angeben.\n\nWenn ein Authentifizierungsfehler angezeigt wird, prüfen Sie die Community-Zeichenfolge auf dem Gerät.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "SNMP-Version",
           "override_community": "SNMP v2c — Community-Override (optional)",
+          "write_community": "SNMP v2c — Schreib-Community (optional; für SET-Anfragen. Leer = Wert aus der Ersteinrichtung, sonst Lese-Community)",
+          "clear_write_community": "SNMP v2c — Schreib-Community aus der Ersteinrichtung entfernen (SET nutzt dann die Lese-Community)",
           "override_port": "SNMP v2c — Port-Override (optional)",
           "uptime_poll_interval": "Uptime-Aktualisierungsintervall (Sekunden)",
           "snmpv3_username": "SNMP v3 — Benutzername (optional)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Attribute (keine Historie)",
         "sensors": "Sensoren (Historie)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Konfiguration speichern",
+      "description": "Schreibt die laufende Konfiguration eines RLTech-Switches in den Flash-Speicher (wie \"Speichern\" in der Weboberfläche des Switches). Per SNMP vorgenommene Änderungen gehen beim Neustart verloren, solange sie nicht gespeichert sind. Höchstens ein Speichervorgang alle 10 Sekunden und 30 pro Stunde.",
+      "fields": {
+        "device_id": {
+          "name": "Switch-Gerät",
+          "description": "Das RLTech-Switch-Gerät, dessen Konfiguration gespeichert werden soll"
+        },
+        "wait": {
+          "name": "Auf Abschluss warten",
+          "description": "Warten, bis der Switch bestätigt, dass die Konfiguration in den Flash geschrieben wurde (sonst sofort nach Annahme des Speicherauftrags zurückkehren)."
+        }
       }
     }
   },

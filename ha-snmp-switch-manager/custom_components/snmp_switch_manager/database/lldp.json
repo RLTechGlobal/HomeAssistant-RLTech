@@ -2,7 +2,7 @@
   "lldp": [
     {
       "oid_rem_sys_name": "1.0.8802.1.1.2.1.4.1.1.9",
-      "vendors": ["Standard", "Cisco", "Dell", "H3C", "HP", "Huawei", "Jt-Com", "Junos", "Mikrotik", "Zyxel"],
+      "vendors": ["Standard", "Cisco", "Dell", "H3C", "HP", "Huawei", "Jt-Com", "Junos", "Mikrotik", "Zyxel", "RLTech"],
       "description": "Standard LLDP-MIB lldpRemSysName OID"
     },
     {

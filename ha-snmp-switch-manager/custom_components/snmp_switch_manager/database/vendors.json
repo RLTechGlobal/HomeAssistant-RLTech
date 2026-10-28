@@ -65,6 +65,13 @@
       "keywords": ["pfsense"]
     },
     {
+      "name": "RLTech",
+      "enterprise_number": "62570",
+      "sys_object_id_prefix": "1.3.6.1.4.1.62570",
+      "keywords": ["en8851", "an8858"],
+      "manufacturer_fallback": "RLTech"
+    },
+    {
       "name": "Standard",
       "enterprise_number": "",
       "sys_object_id_prefix": "",

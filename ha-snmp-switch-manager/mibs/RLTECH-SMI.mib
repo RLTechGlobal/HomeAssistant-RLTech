@@ -1,0 +1,71 @@
+RLTECH-SMI DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, enterprises
+        FROM SNMPv2-SMI;
+
+rltech MODULE-IDENTITY
+    LAST-UPDATED "202610220000Z"
+    ORGANIZATION "RLTech"
+    CONTACT-INFO
+        "RLTech
+         Web: <TODO: company URL>"
+    DESCRIPTION
+        "The structure of management information for the RLTech
+         enterprise (IANA private enterprise number 62570).
+
+         Layout of the enterprise arc:
+           rltech.1  - rltech.99   product identification only. These
+                                   arcs are used as sysObjectID values
+                                   and never carry readable or writable
+                                   objects.
+           rltech.100              rltMgmt, root of all RLTech MIB
+                                   modules. Nothing below it is used as
+                                   a sysObjectID value."
+    REVISION    "202610220000Z"
+    DESCRIPTION
+        "Initial version."
+    ::= { enterprises 62570 }
+
+--
+-- Product identification (sysObjectID = rltProdXXXX.<model number>)
+--
+
+rltProdEN8851 OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "Switches based on the EN8851 switch chip. The sysObjectID of
+         such a switch is rltProdEN8851.<n>, where the sub-identifier
+         <n> is the product model number of the switch."
+    ::= { rltech 1 }
+
+rltProdAN8858 OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "Switches based on the AN8858 switch chip. The sysObjectID of
+         such a switch is rltProdAN8858.<n>, where the sub-identifier
+         <n> is the product model number of the switch."
+    ::= { rltech 2 }
+
+rltProdAN8855 OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "Reserved for switches based on the AN8855 switch chip. No
+         current product reports this arc."
+    ::= { rltech 3 }
+
+-- rltech.4 - rltech.99: reserved for further chips / product lines.
+
+--
+-- MIB modules
+--
+
+rltMgmt OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "Root of the RLTech MIB modules.
+           rltMgmt.1              RLTECH-MW-MIB (managed switch firmware)
+           rltMgmt.2 - .99        reserved for further RLTECH-* modules"
+    ::= { rltech 100 }
+
+END

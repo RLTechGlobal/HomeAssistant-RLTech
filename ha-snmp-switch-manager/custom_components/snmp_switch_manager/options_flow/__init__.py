@@ -11,6 +11,8 @@ from homeassistant.helpers import selector
 from ..const import (
     CONF_FEATURE_OVERRIDES,
     CONF_OVERRIDE_COMMUNITY,
+    CONF_WRITE_COMMUNITY,
+    CONF_CLEAR_WRITE_COMMUNITY,
     CONF_OVERRIDE_PORT,
     CONF_UPTIME_POLL_INTERVAL,
     DEFAULT_UPTIME_POLL_INTERVAL,
@@ -353,6 +355,20 @@ class OptionsFlowHandler(
             else:
                 self._options.pop(CONF_OVERRIDE_COMMUNITY, None)
 
+            # Optional v2c write community:
+            #   value entered        -> used for SET
+            #   blank                -> value from initial setup, else read community
+            #   blank + "clear" box  -> always the read community
+            write_comm = _opt_str(CONF_WRITE_COMMUNITY)
+            if write_comm:
+                self._options[CONF_WRITE_COMMUNITY] = write_comm
+            else:
+                self._options.pop(CONF_WRITE_COMMUNITY, None)
+            if user_input.get(CONF_CLEAR_WRITE_COMMUNITY) and not write_comm:
+                self._options[CONF_CLEAR_WRITE_COMMUNITY] = True
+            else:
+                self._options.pop(CONF_CLEAR_WRITE_COMMUNITY, None)
+
             v3_user = _opt_str(CONF_SNMPV3_USERNAME)
             auth_proto = str(user_input.get(CONF_SNMPV3_AUTH_PROTOCOL) or "").strip().lower()
             auth_pass = str(user_input.get(CONF_SNMPV3_AUTH_PASSWORD) or "")
@@ -437,6 +453,14 @@ class OptionsFlowHandler(
                     CONF_OVERRIDE_COMMUNITY,
                     default=str(self._options.get(CONF_OVERRIDE_COMMUNITY, "")),
                 ): str,
+                vol.Optional(
+                    CONF_WRITE_COMMUNITY,
+                    default=str(self._options.get(CONF_WRITE_COMMUNITY, "")),
+                ): str,
+                vol.Optional(
+                    CONF_CLEAR_WRITE_COMMUNITY,
+                    default=bool(self._options.get(CONF_CLEAR_WRITE_COMMUNITY, False)),
+                ): cv.boolean,
                 vol.Optional(
                     CONF_OVERRIDE_PORT,
                     default=str(self._options.get(CONF_OVERRIDE_PORT, "")),

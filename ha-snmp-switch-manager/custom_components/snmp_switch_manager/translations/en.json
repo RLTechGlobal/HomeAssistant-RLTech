@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "SNMP community (RW for alias writes)"
+          "community": "SNMP community (RW for alias writes)",
+          "write_community": "SNMP write community (optional; used for port on/off, alias and other writes — leave blank to use the community above)"
         },
         "description": "Provide SNMP v2c community.\n\nIf you see an authentication error, confirm the community string on the device.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "SNMP version",
           "override_community": "SNMP v2c — Community override (optional)",
+          "write_community": "SNMP v2c — Write community (optional; used for SET requests. Blank = value from initial setup, or the read community if none)",
+          "clear_write_community": "SNMP v2c — Clear the write community from initial setup (SET then uses the read community)",
           "override_port": "SNMP v2c — Port override (optional)",
           "uptime_poll_interval": "Uptime refresh interval (seconds)",
           "snmpv3_username": "SNMP v3 — Username (optional)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Attributes (no history)",
         "sensors": "Sensors (history)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Save configuration",
+      "description": "Write the running configuration of an RLTech switch to flash (same as \"Save\" in the switch web UI). Changes made via SNMP are lost on reboot until they are saved. At most one save every 10 seconds and 30 per hour.",
+      "fields": {
+        "device_id": {
+          "name": "Switch Device",
+          "description": "The RLTech switch device to save"
+        },
+        "wait": {
+          "name": "Wait for completion",
+          "description": "Wait until the switch confirms that the configuration was written to flash (otherwise return as soon as the save was accepted)."
+        }
       }
     }
   },

@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "Communauté SNMP (RW pour écrire des alias)"
+          "community": "Communauté SNMP (RW pour écrire des alias)",
+          "write_community": "Communauté SNMP en écriture (facultatif ; pour activer/désactiver les ports, les alias et autres écritures — vide = communauté ci-dessus)"
         },
         "description": "Fournissez la communauté SNMP v2c.\n\nSi vous voyez une erreur d’authentification, vérifiez la chaîne de communauté sur l’appareil.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "Version SNMP",
           "override_community": "SNMP v2c — Surcharge de communauté (facultatif)",
+          "write_community": "SNMP v2c — Communauté en écriture (facultatif ; pour les requêtes SET. Vide = valeur de la configuration initiale, sinon communauté de lecture)",
+          "clear_write_community": "SNMP v2c — Effacer la communauté en écriture de la configuration initiale (SET utilisera la communauté de lecture)",
           "override_port": "SNMP v2c — Surcharge de port (facultatif)",
           "uptime_poll_interval": "Intervalle de rafraîchissement d’uptime (secondes)",
           "snmpv3_username": "SNMP v3 — Nom d’utilisateur (facultatif)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Attributs (sans historique)",
         "sensors": "Capteurs (historique)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Enregistrer la configuration",
+      "description": "Écrit la configuration en cours d'un switch RLTech dans la mémoire flash (comme « Enregistrer » dans l'interface web du switch). Les modifications faites via SNMP sont perdues au redémarrage tant qu'elles ne sont pas enregistrées. Au plus un enregistrement toutes les 10 secondes et 30 par heure.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil switch",
+          "description": "Le switch RLTech dont la configuration doit être enregistrée"
+        },
+        "wait": {
+          "name": "Attendre la fin",
+          "description": "Attendre que le switch confirme l'écriture de la configuration en flash (sinon, rendre la main dès que la demande est acceptée)."
+        }
       }
     }
   },

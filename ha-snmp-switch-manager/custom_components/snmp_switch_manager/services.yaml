@@ -141,3 +141,26 @@ set_port_admin_status:
           options:
             - "Up"
             - "Down"
+
+save_config:
+  name: Save configuration
+  description: >-
+    Write the running configuration of an RLTech switch to flash (same as
+    "Save" in the switch web UI). Port, description and system name changes
+    made via SNMP are lost on reboot until they are saved. The switch accepts
+    at most one save every 10 seconds and 30 per hour.
+  fields:
+    device_id:
+      name: Switch Device
+      description: The RLTech switch device to save
+      required: true
+      selector:
+        device:
+          integration: snmp_switch_manager
+    wait:
+      name: Wait for completion
+      description: Wait until the switch confirms that the configuration was written to flash before returning (otherwise return as soon as the save was accepted).
+      required: false
+      default: true
+      selector:
+        boolean:

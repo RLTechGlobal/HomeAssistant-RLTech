@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "SNMP 团体字（读写团体字用于写入别名）"
+          "community": "SNMP 团体字（读写团体字用于写入别名）",
+          "write_community": "SNMP 写团体字（可选；用于端口开关、别名等写操作，留空则使用上面的团体字）"
         },
         "description": "提供 SNMP v2c 团体字。\n\n如果出现身份验证错误，请核对设备上的团体字字符串。",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "SNMP 版本",
           "override_community": "SNMP v2c — 团体字重写（可选）",
+          "write_community": "SNMP v2c — 写团体字（可选；用于 SET 请求。留空 = 使用初始设置中的值，若无则使用读团体字）",
+          "clear_write_community": "SNMP v2c — 清除初始设置中的写团体字（SET 改用读团体字）",
           "override_port": "SNMP v2c — 端口重写（可选）",
           "uptime_poll_interval": "运行时间刷新间隔（秒）",
           "snmpv3_username": "SNMP v3 — 用户名（可选）",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "属性（无历史记录）",
         "sensors": "传感器（历史记录）"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "保存配置",
+      "description": "将 RLTech 交换机的运行配置写入 Flash（等同于交换机网页上的“保存”）。通过 SNMP 做的修改在保存前重启会丢失。最多每 10 秒保存一次，每小时最多 30 次。",
+      "fields": {
+        "device_id": {
+          "name": "交换机设备",
+          "description": "要保存配置的 RLTech 交换机"
+        },
+        "wait": {
+          "name": "等待完成",
+          "description": "等交换机确认配置已写入 Flash 后再返回（否则在保存请求被受理后立即返回）。"
+        }
       }
     }
   },

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 import logging
 import os
@@ -7,6 +8,7 @@ import json
 from typing import Any, Dict, Optional, List
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from .features.cpu import poll_cpu
 from .features.memory import poll_memory
@@ -22,7 +24,8 @@ from .features.poe import poll_poe
 from .features.h3c import poll_h3c_environment
 from .features.engine import ensure_engine
 from .features.device_info import initialize_device_info, refresh_device_info
-from .features.auth import build_auth_data
+from .features.auth import build_auth_data, build_write_auth_data
+from .database_builtin import is_rltech_vendor, merge_builtin_all
 
 from .snmp_compat import (
     UdpTransportTarget,
@@ -36,6 +39,9 @@ from .snmp_compat import (
     _do_set_poe_admin,
     _do_set_poe_priority,
     _do_set_system_string,
+    _do_set_integer,
+    SnmpAuthError,
+    SnmpConnectionError,
 )
 
 
@@ -57,9 +63,28 @@ from .const import (
     CONF_ENV_POLL_INTERVAL,
     ENV_MODE_ATTRIBUTES,
     DEFAULT_ENV_POLL_INTERVAL,
+    OID_rltMwCfgSaveAction,
+    OID_rltMwCfgSaveStatus,
+    OID_rltMwCfgSaveLastTime,
+    RLTECH_SAVE_ACTION_SAVE,
+    RLTECH_SAVE_STATUS,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# How long a heavy poll that is already running may delay a save request.
+_CFGSAVE_WAIT_POLL_IDLE = 15.0
+# Interval between status reads while waiting for a save to complete.
+_CFGSAVE_STATUS_INTERVAL = 1.0
+
+
+def _to_int(value: Any) -> Optional[int]:
+    """int() of an SNMP value rendered as text; None for noSuchObject & co."""
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
 
 # ---------- client ----------
 
@@ -114,6 +139,8 @@ class SwitchSnmpClient:
 
         # SNMP auth/security model (v2c community or v3 USM)
         self.auth_data = self._build_auth_data(self._snmp_settings)
+        # Credentials for SET requests (v2c write community, falls back to auth_data)
+        self.write_auth_data = build_write_auth_data(self._snmp_settings)
         self.context = ContextData()
 
         self.cache: Dict[str, Any] = {
@@ -142,6 +169,18 @@ class SwitchSnmpClient:
         # change at runtime; fetch once during async_initialize and skip on polls.
         self._vendor_oids_fetched: bool = False
 
+        # RLTech "save configuration" (RLTECH-MW-MIB rltMwConfig).
+        # While a save runs the switch's configuration database is busy and
+        # GETs of ifTable & co. stall until it is done, so heavy polling is
+        # paused (monotonic deadline, 0 = not busy) and a save waits for a
+        # heavy poll already in flight (_heavy_idle) before it starts.
+        self._cfgsave_lock = asyncio.Lock()
+        self._cfgsave_busy_until: float = 0.0
+        self._cfgsave_probed: bool = False
+        self._heavy_idle = asyncio.Event()
+        self._heavy_idle.set()
+        self.cache["cfgsave_supported"] = False
+
     def _load_database(self) -> None:
         """Load OID database from JSON files."""
         self._database = {}
@@ -159,16 +198,22 @@ class SwitchSnmpClient:
                 except Exception as e:
                     _LOGGER.error("Failed to load database file %s: %s", filename, e)
 
+        # Built-in vendor entries (e.g. RLTech) are merged in memory so that
+        # they keep working even if an automatic update replaced the files.
+        self._database = merge_builtin_all(self._database)
+
     def _get_vendor_info(self) -> Dict[str, Any]:
         """Determine vendor metadata dynamically based on sysObjectID or sysDescr."""
         sys_obj_id = self.cache.get("sysObjectID") or ""
         sys_descr = self.cache.get("sysDescr") or ""
         vendors_db = self._database.get("vendors", {}).get("vendors", [])
 
-        # 1. Match by sysObjectID prefix first
+        # 1. Match by sysObjectID prefix first (on an arc boundary, so that
+        #    e.g. prefix "1.3.6.1.4.1.9" does not match "1.3.6.1.4.1.99...")
+        sys_obj_id_n = sys_obj_id.lstrip(".")
         for v in vendors_db:
-            prefix = v.get("sys_object_id_prefix")
-            if prefix and sys_obj_id.startswith(prefix):
+            prefix = str(v.get("sys_object_id_prefix") or "").lstrip(".")
+            if prefix and (sys_obj_id_n == prefix or sys_obj_id_n.startswith(prefix + ".")):
                 return v
 
         # 2. Match by keywords in sysDescr or sysObjectID
@@ -324,10 +369,24 @@ class SwitchSnmpClient:
 
     # ---------- coordinator hook ----------
     async def async_poll(self) -> Dict[str, Any]:
-        # Keep system/diagnostic fields fresh (e.g., sysUpTime) so diagnostic
-        # sensors update without requiring an integration restart.
         await self._ensure_engine()
         await self._ensure_target()
+
+        if self._cfgsave_busy:
+            # A configuration save is running on the switch: only read the
+            # save status (served without touching the switch database).
+            await self._async_poll_cfgsave()
+            return self.cache
+
+        self._heavy_idle.clear()
+        try:
+            return await self._async_poll_full()
+        finally:
+            self._heavy_idle.set()
+
+    async def _async_poll_full(self) -> Dict[str, Any]:
+        # Keep system/diagnostic fields fresh (e.g., sysUpTime) so diagnostic
+        # sensors update without requiring an integration restart.
 
         # sysUpTime can be very "chatty"; poll it less frequently.
         now_mono = time.monotonic()
@@ -377,6 +436,13 @@ class SwitchSnmpClient:
         else:
             # Re-evaluate manufacturer/firmware from sysDescr on each subsequent poll
             await refresh_device_info(self)
+
+        # RLTech: detect the save-configuration object once, then keep its
+        # status / last-save time fresh (3 varbinds, cheap on the switch).
+        if not self._cfgsave_probed:
+            await self._async_probe_cfgsave()
+        if self.cache.get("cfgsave_supported"):
+            await self._async_poll_cfgsave()
 
         await self.async_refresh_dynamic()
 
@@ -449,11 +515,180 @@ class SwitchSnmpClient:
 
         return self.cache
 
+    # ---------- RLTech configuration save ----------
+    @property
+    def _cfgsave_busy(self) -> bool:
+        return self._cfgsave_busy_until > 0 and time.monotonic() < self._cfgsave_busy_until
+
+    async def _async_probe_cfgsave(self) -> None:
+        """Set cache["cfgsave_supported"] for RLTech firmware that has rltMwCfgSaveStatus."""
+        if not is_rltech_vendor(self.cache.get("vendor")):
+            self._cfgsave_probed = True
+            self.cache["cfgsave_supported"] = False
+            return
+        try:
+            value = await self._async_get_one(OID_rltMwCfgSaveStatus)
+        except (SnmpAuthError, SnmpConnectionError) as exc:
+            # Transient: try again on the next poll.
+            _LOGGER.debug("Save-configuration probe failed on %s: %s", self.host, exc)
+            return
+        if value is None:
+            # errorStatus (e.g. genErr) instead of a value: not conclusive.
+            _LOGGER.debug("Save-configuration probe on %s inconclusive, will retry", self.host)
+            return
+        self._cfgsave_probed = True
+        status = _to_int(value)
+        # A status 1..4 confirms support; any other value (older firmware
+        # answers noSuchObject) confirms that the object does not exist.
+        self.cache["cfgsave_supported"] = status in RLTECH_SAVE_STATUS
+        _LOGGER.debug("Save-configuration support on %s: %s (status=%s)", self.host,
+                      self.cache["cfgsave_supported"], value)
+
+    def cfgsave_state(self) -> str:
+        """"supported", "unsupported" (confirmed) or "unknown" (probe not conclusive yet)."""
+        if self.cache.get("cfgsave_supported"):
+            return "supported"
+        if self._cfgsave_probed or not is_rltech_vendor(self.cache.get("vendor")):
+            return "unsupported"
+        return "unknown"
+
+    async def _async_read_cfgsave(self) -> Optional[int]:
+        """Read status / last-save time / sysUpTime in one GET; returns the status code."""
+        got = await _do_get_many(
+            self.engine, self.auth_data, self.target, self.context,
+            [OID_rltMwCfgSaveStatus, OID_rltMwCfgSaveLastTime, OID_sysUpTime],
+        )
+        status = _to_int(got.get(OID_rltMwCfgSaveStatus))
+        last = _to_int(got.get(OID_rltMwCfgSaveLastTime))
+        uptime = _to_int(got.get(OID_sysUpTime))
+        if status in RLTECH_SAVE_STATUS:
+            self.cache["cfgsave_status"] = RLTECH_SAVE_STATUS[status]
+        if last is not None and uptime is not None:
+            self.cache["cfgsave_last_ticks"] = last
+            self.cache["cfgsave_uptime_ticks"] = uptime
+        return status
+
+    async def _async_poll_cfgsave(self) -> None:
+        try:
+            status = await self._async_read_cfgsave()
+        except (SnmpAuthError, SnmpConnectionError) as exc:
+            _LOGGER.debug("Save-configuration status read failed on %s: %s", self.host, exc)
+            return
+        # save_config(wait=False) leaves the busy window open; close it as
+        # soon as the switch no longer reports inProgress.
+        if (
+            self._cfgsave_busy_until
+            and not self._cfgsave_lock.locked()
+            and status in RLTECH_SAVE_STATUS
+            and RLTECH_SAVE_STATUS[status] != "in_progress"
+        ):
+            self._cfgsave_busy_until = 0.0
+
+    async def save_config(self, wait: bool = True, timeout: float = 40.0) -> str:
+        """Write the running configuration of an RLTech switch to flash.
+
+        Returns "success" (wait=True) or "accepted" (wait=False); raises
+        HomeAssistantError with a readable reason otherwise.
+        """
+        if not self.cache.get("cfgsave_supported"):
+            raise HomeAssistantError("This switch does not support saving the configuration via SNMP")
+        if self._cfgsave_lock.locked():
+            raise HomeAssistantError("A configuration save is already in progress for this switch")
+
+        async with self._cfgsave_lock:
+            await self._ensure_engine()
+            await self._ensure_target()
+            deadline = time.monotonic() + float(timeout)
+            self._cfgsave_busy_until = deadline
+            try:
+                # Do not start while a heavy poll is still talking to the switch.
+                try:
+                    await asyncio.wait_for(self._heavy_idle.wait(), _CFGSAVE_WAIT_POLL_IDLE)
+                except asyncio.TimeoutError:
+                    _LOGGER.debug("Heavy poll still running on %s, saving anyway", self.host)
+
+                # Status before the SET tells a retransmitted SET of our own
+                # (agent already inProgress because of us) from a save that
+                # was already running before we asked (another manager).
+                try:
+                    before = await self._async_read_cfgsave()
+                except (SnmpAuthError, SnmpConnectionError):
+                    before = None
+                if RLTECH_SAVE_STATUS.get(before or 0) == "in_progress":
+                    raise HomeAssistantError("The switch is already saving its configuration")
+
+                try:
+                    ok, err = await _do_set_integer(
+                        self.engine, self.write_auth_data, self.target, self.context,
+                        OID_rltMwCfgSaveAction, RLTECH_SAVE_ACTION_SAVE,
+                    )
+                except SnmpAuthError as exc:
+                    raise HomeAssistantError(f"SNMP authentication failed while saving: {exc}") from exc
+                except SnmpConnectionError as exc:
+                    raise HomeAssistantError(
+                        "The switch did not answer the save request. Check that a write "
+                        f"community is configured and correct ({exc})"
+                    ) from exc
+                if not ok and "inconsistentvalue" in (err or "").lower():
+                    # pysnmp retransmits a SET whose response was lost; the
+                    # agent then answers the retransmission with
+                    # inconsistentValue because OUR save is running. The
+                    # save was not running before the SET (checked above),
+                    # so inProgress now means our request was accepted.
+                    try:
+                        after = await self._async_read_cfgsave()
+                    except (SnmpAuthError, SnmpConnectionError):
+                        after = None
+                    if RLTECH_SAVE_STATUS.get(after or 0) == "in_progress":
+                        _LOGGER.debug("Save on %s: inconsistentValue after retransmission, save is running", self.host)
+                        ok, err = True, None
+                if not ok:
+                    e = (err or "").lower()
+                    if "inconsistentvalue" in e:
+                        raise HomeAssistantError("The switch is already saving its configuration")
+                    if "resourceunavailable" in e:
+                        raise HomeAssistantError(
+                            "Configuration saved too often; wait at least 10 seconds between "
+                            "saves (at most 30 per hour) and try again"
+                        )
+                    if any(k in e for k in ("noaccess", "notwritable", "authorization", "nosuchname", "readonly")):
+                        raise HomeAssistantError(
+                            f"The switch refused the save request ({err}); check the write community"
+                        )
+                    raise HomeAssistantError(f"The switch refused the save request ({err})")
+
+                self.cache["cfgsave_status"] = "in_progress"
+                if not wait:
+                    # Busy window stays open until a poll sees the save finish.
+                    return "accepted"
+
+                while time.monotonic() < deadline:
+                    await asyncio.sleep(_CFGSAVE_STATUS_INTERVAL)
+                    try:
+                        status = await self._async_read_cfgsave()
+                    except (SnmpAuthError, SnmpConnectionError) as exc:
+                        _LOGGER.debug("Save status read failed on %s: %s", self.host, exc)
+                        continue
+                    name = RLTECH_SAVE_STATUS.get(status or 0)
+                    if name == "success":
+                        return "success"
+                    if name == "failed":
+                        raise HomeAssistantError("The switch reported that saving the configuration failed")
+                raise HomeAssistantError(
+                    f"The switch did not confirm the configuration save within {int(timeout)} s"
+                )
+            except BaseException:
+                self._cfgsave_busy_until = 0.0
+                raise
+            finally:
+                if wait:
+                    self._cfgsave_busy_until = 0.0
+
     # ---------- mutations ----------
     async def set_alias(self, if_index: int, alias: str) -> bool:
         await self._ensure_engine()
         await self._ensure_target()
-        ok = await _do_set_alias(self.engine, self.auth_data, self.target, self.context, if_index, alias)
+        ok = await _do_set_alias(self.engine, self.write_auth_data, self.target, self.context, if_index, alias)
         if ok:
             self.cache.setdefault("ifTable", {}).setdefault(if_index, {})["alias"] = alias
         else:
@@ -463,7 +698,7 @@ class SwitchSnmpClient:
     async def set_admin_status(self, if_index: int, value: int) -> bool:
         await self._ensure_engine()
         await self._ensure_target()
-        return await _do_set_admin_status(self.engine, self.auth_data, self.target, self.context, if_index, value)
+        return await _do_set_admin_status(self.engine, self.write_auth_data, self.target, self.context, if_index, value)
 
     async def set_poe_admin(self, group_index: int, port_index: int, value: int) -> bool:
         await self._ensure_engine()
@@ -479,7 +714,7 @@ class SwitchSnmpClient:
                 standard_item = item
                 break
         custom_oid = (standard_item or {}).get("oid_port_admin")
-        ok = await _do_set_poe_admin(self.engine, self.auth_data, self.target, self.context, group_index, port_index, value, custom_oid)
+        ok = await _do_set_poe_admin(self.engine, self.write_auth_data, self.target, self.context, group_index, port_index, value, custom_oid)
         if ok:
             # Update cache immediately
             ifindex_map = self.cache.get("ifindex_by_baseport", {})
@@ -504,7 +739,7 @@ class SwitchSnmpClient:
                 standard_item = item
                 break
         custom_oid = (standard_item or {}).get("oid_port_priority")
-        ok = await _do_set_poe_priority(self.engine, self.auth_data, self.target, self.context, group_index, port_index, value, custom_oid)
+        ok = await _do_set_poe_priority(self.engine, self.write_auth_data, self.target, self.context, group_index, port_index, value, custom_oid)
         if ok:
             # Update cache immediately
             ifindex_map = self.cache.get("ifindex_by_baseport", {})
@@ -518,7 +753,7 @@ class SwitchSnmpClient:
     async def set_system_string(self, oid: str, value: str) -> bool:
         await self._ensure_engine()
         await self._ensure_target()
-        ok = await _do_set_system_string(self.engine, self.auth_data, self.target, self.context, oid, value)
+        ok = await _do_set_system_string(self.engine, self.write_auth_data, self.target, self.context, oid, value)
         if ok:
             if oid in (OID_sysName, self._custom_oid("name"), self._custom_oid("hostname")):
                 self.cache["sysName"] = value

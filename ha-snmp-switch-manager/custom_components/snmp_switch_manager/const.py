@@ -11,6 +11,15 @@ DOMAIN = "snmp_switch_manager"
 # Target GitHub branch for downloading database files and creating PRs
 GITHUB_BRANCH = "main"
 
+# Source of the automatic JSON database updates (db_updater.py).
+# Defaults to the upstream repository; point DB_SOURCE_REPO / DB_SOURCE_BRANCH
+# at your own fork to control which database revision gets downloaded.
+# Entries in database_builtin.py (e.g. RLTech) are merged on top of whatever
+# is downloaded, so they survive automatic updates either way.
+DB_SOURCE_REPO = "OtisPresley/snmp-switch-manager"
+DB_SOURCE_BRANCH = GITHUB_BRANCH
+DB_SOURCE_PATH = "custom_components/snmp_switch_manager/database"
+
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_COMMUNITY = "community" 
@@ -21,7 +30,7 @@ CONF_POLL_INTERVAL = "poll_interval"
 MIN_POLL_INTERVAL = 5    # seconds
 MAX_POLL_INTERVAL = 300  # seconds
 
-PLATFORMS = ["sensor", "switch", "select"]
+PLATFORMS = ["sensor", "switch", "select", "button"]
 
 # --- Diagnostic OIDs (built-in defaults) ---
 # Standard SNMP system OIDs
@@ -40,6 +49,14 @@ OID_entPhysicalSerialNum = "1.3.6.1.2.1.47.1.1.1.1.11"
 OID_entPhysicalDescr = "1.3.6.1.2.1.47.1.1.1.1.2"
 OID_entPhysicalClass = "1.3.6.1.2.1.47.1.1.1.1.5"
 OID_entPhysicalName = "1.3.6.1.2.1.47.1.1.1.1.7"
+
+# --- RLTECH-MW-MIB (RLTech switches, mibs/RLTECH-MW-MIB.mib) ---
+# rltMwConfig = 1.3.6.1.4.1.62570.100.1.1.1.1
+OID_rltMwCfgSaveAction = "1.3.6.1.4.1.62570.100.1.1.1.1.1.0"    # INTEGER save(1) / noOp(2), RW
+OID_rltMwCfgSaveStatus = "1.3.6.1.4.1.62570.100.1.1.1.1.2.0"    # INTEGER idle(1)..failed(4), RO
+OID_rltMwCfgSaveLastTime = "1.3.6.1.4.1.62570.100.1.1.1.1.3.0"  # TimeStamp (sysUpTime ticks), RO
+RLTECH_SAVE_ACTION_SAVE = 1
+RLTECH_SAVE_STATUS: dict[int, str] = {1: "idle", 2: "in_progress", 3: "success", 4: "failed"}
 
 # --- POWER-ETHERNET-MIB ---
 OID_pethPsePortActualPower = "1.3.6.1.2.1.105.1.1.1.15"
@@ -140,6 +157,12 @@ MIN_ENV_POLL_INTERVAL = 5
 MAX_ENV_POLL_INTERVAL = 3600
 
 CONF_OVERRIDE_COMMUNITY = "override_community"
+# Optional SNMP v2c write community. Used for SET requests (port enable/disable,
+# alias, PoE, system strings); when empty the read community is used.
+CONF_WRITE_COMMUNITY = "write_community"
+# Options-only flag: ignore the write community from initial setup (SET uses
+# the read community) unless a new write community is entered.
+CONF_CLEAR_WRITE_COMMUNITY = "clear_write_community"
 CONF_OVERRIDE_PORT = "override_port" 
 
 # ---------------------------
@@ -256,6 +279,16 @@ __all__ = [
     "Any",
     "DOMAIN",
     "GITHUB_BRANCH",
+    "DB_SOURCE_REPO",
+    "DB_SOURCE_BRANCH",
+    "DB_SOURCE_PATH",
+    "CONF_WRITE_COMMUNITY",
+    "CONF_CLEAR_WRITE_COMMUNITY",
     "PLATFORMS",
+    "OID_rltMwCfgSaveAction",
+    "OID_rltMwCfgSaveStatus",
+    "OID_rltMwCfgSaveLastTime",
+    "RLTECH_SAVE_ACTION_SAVE",
+    "RLTECH_SAVE_STATUS",
     # Add your specific OID variable names here as well
 ]

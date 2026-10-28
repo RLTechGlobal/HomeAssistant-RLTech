@@ -13,6 +13,7 @@ from homeassistant.helpers import selector
 from .const import (
     DOMAIN,
     CONF_COMMUNITY,
+    CONF_WRITE_COMMUNITY,
     DEFAULT_PORT,
     CONF_SNMP_VERSION,
     SNMP_VERSION_V2C,
@@ -30,6 +31,7 @@ from .const import (
     CONF_LEGACY_DEVICE_ID,
 )
 from .helpers import test_connection, get_sysname
+from .database_builtin import merge_builtin_all
 from .snmp_compat import SnmpAuthError, SnmpConnectionError
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
@@ -85,6 +87,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             community = str(user_input.get(CONF_COMMUNITY) or "").strip()
+            # Optional write community for SET requests; blank -> use `community`.
+            write_community = str(user_input.get(CONF_WRITE_COMMUNITY) or "").strip()
             if not community:
                 errors[CONF_COMMUNITY] = "required"
             else:
@@ -113,19 +117,28 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(f"{host}:{port}:{community}")
                     self._abort_if_unique_id_configured()
 
+                    data = {
+                        "host": host,
+                        "port": port,
+                        "community": community,
+                        CONF_LEGACY_DEVICE_ID: legacy_device_id,
+                        CONF_SNMP_VERSION: SNMP_VERSION_V2C,
+                        "name": title,
+                    }
+                    if write_community:
+                        data[CONF_WRITE_COMMUNITY] = write_community
+
                     return self.async_create_entry(
                         title=title,
-                        data={
-                            "host": host,
-                            "port": port,
-                            "community": community,
-                            CONF_LEGACY_DEVICE_ID: legacy_device_id,
-                            CONF_SNMP_VERSION: SNMP_VERSION_V2C,
-                            "name": title,
-                        },
+                        data=data,
                     )
 
-        schema = vol.Schema({vol.Required(CONF_COMMUNITY): str})
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_COMMUNITY): str,
+                vol.Optional(CONF_WRITE_COMMUNITY, default=""): str,
+            }
+        )
         return self.async_show_form(step_id="snmpv2c", data_schema=schema, errors=errors)
 
     async def async_step_snmpv3(self, user_input=None) -> FlowResult:
@@ -287,5 +300,6 @@ def load_database() -> dict:
                     database[key] = json.load(f)
             except Exception:
                 pass
-    return database
+    # Built-in vendor entries (e.g. RLTech) survive automatic database updates
+    return merge_builtin_all(database)
 

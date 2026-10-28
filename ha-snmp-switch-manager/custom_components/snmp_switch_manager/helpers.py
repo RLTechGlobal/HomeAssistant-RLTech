@@ -7,6 +7,8 @@ from typing import Any, Optional
 
 from .const import (
     CONF_OVERRIDE_COMMUNITY,
+    CONF_WRITE_COMMUNITY,
+    CONF_CLEAR_WRITE_COMMUNITY,
     CONF_OVERRIDE_PORT,
     CONF_SNMP_VERSION,
     SNMP_VERSION_V2C,
@@ -56,6 +58,12 @@ def get_snmp_connection_settings(entry_data: dict[str, Any], options: dict[str, 
         or ""
     ).strip()
 
+    # Optional v2c write community (blank -> SET requests use `community`).
+    # Precedence: options value > (setup value unless cleared in options).
+    write_community = str((options or {}).get(CONF_WRITE_COMMUNITY) or "").strip()
+    if not write_community and not (options or {}).get(CONF_CLEAR_WRITE_COMMUNITY):
+        write_community = str((entry_data or {}).get(CONF_WRITE_COMMUNITY) or "").strip()
+
     def _v3(key: str) -> str:
         return str(
             (options or {}).get(key) or (entry_data or {}).get(key) or ""
@@ -66,6 +74,7 @@ def get_snmp_connection_settings(entry_data: dict[str, Any], options: dict[str, 
         "port": port,
         "version": version,
         "community": community,
+        CONF_WRITE_COMMUNITY: write_community,
         CONF_SNMPV3_USERNAME: _v3(CONF_SNMPV3_USERNAME),
         CONF_SNMPV3_AUTH_PROTOCOL: _v3(CONF_SNMPV3_AUTH_PROTOCOL).lower(),
         CONF_SNMPV3_AUTH_PASSWORD: str(

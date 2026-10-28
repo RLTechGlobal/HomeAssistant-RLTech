@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "Ciąg community SNMP (RW do zapisu aliasów)"
+          "community": "Ciąg community SNMP (RW do zapisu aliasów)",
+          "write_community": "Ciąg community SNMP do zapisu (opcjonalnie; do włączania/wyłączania portów, aliasów i innych zapisów — puste = community powyżej)"
         },
         "description": "Podaj ciąg community SNMP v2c.\n\nJeśli widzisz błąd uwierzytelniania, sprawdź ciąg znaków community na urządzeniu.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "Wersja SNMP",
           "override_community": "SNMP v2c — Nadpisanie community (opcjonalnie)",
+          "write_community": "SNMP v2c — Community do zapisu (opcjonalnie; dla żądań SET. Puste = wartość z konfiguracji początkowej, a jeśli jej brak — community odczytu)",
+          "clear_write_community": "SNMP v2c — Usuń community do zapisu z konfiguracji początkowej (SET użyje community odczytu)",
           "override_port": "SNMP v2c — Nadpisanie portu (opcjonalnie)",
           "uptime_poll_interval": "Interwał odświeżania czasu pracy (sekundy)",
           "snmpv3_username": "SNMP v3 — Nazwa użytkownika (opcjonalnie)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Atrybuty (brak historii)",
         "sensors": "Sensory (z historią)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Zapisz konfigurację",
+      "description": "Zapisuje bieżącą konfigurację przełącznika RLTech w pamięci flash (tak jak „Zapisz” w interfejsie WWW przełącznika). Zmiany wprowadzone przez SNMP są tracone po restarcie, dopóki nie zostaną zapisane. Najwyżej jeden zapis co 10 sekund i 30 na godzinę.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie przełącznika",
+          "description": "Przełącznik RLTech, którego konfiguracja ma zostać zapisana"
+        },
+        "wait": {
+          "name": "Czekaj na zakończenie",
+          "description": "Czekaj, aż przełącznik potwierdzi zapis konfiguracji we flash (w przeciwnym razie zakończ od razu po przyjęciu żądania)."
+        }
       }
     }
   },

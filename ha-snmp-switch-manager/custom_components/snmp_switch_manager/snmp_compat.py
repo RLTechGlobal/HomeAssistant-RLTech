@@ -118,6 +118,7 @@ __all__ = [
     "_do_set_poe_admin",
     "_do_set_poe_priority",
     "_do_set_system_string",
+    "_do_set_integer",
 ]
 
 from typing import Any, Optional, Dict, Tuple, List
@@ -423,3 +424,29 @@ async def _do_set_system_string(engine, community, target, context, oid: str, va
             raise SnmpAuthError(str(err_ind))
         raise SnmpConnectionError(str(err_ind))
     return (not err_ind) and (not err_stat)
+
+
+async def _do_set_integer(engine, community, target, context, oid: str, value: int) -> Tuple[bool, Optional[str]]:
+    """SET one INTEGER object.
+
+    Returns ``(ok, error_status_name)``: ``error_status_name`` is the agent's
+    errorStatus (e.g. ``"inconsistentValue"``, ``"resourceUnavailable"``)
+    when the SET was refused, else None. Transport/auth failures raise like
+    the other SET helpers.
+    """
+    err_ind, err_stat, _err_idx, _vbs = await set_cmd(
+        engine, community, target, context,
+        ObjectType(ObjectIdentity(oid), Integer(value)),
+        lookupMib=False,
+    )
+    if err_ind:
+        if _is_auth_error(err_ind):
+            raise SnmpAuthError(str(err_ind))
+        raise SnmpConnectionError(str(err_ind))
+    if err_stat:
+        try:
+            name = err_stat.prettyPrint()
+        except Exception:  # noqa: BLE001 - plain ints from legacy pysnmp
+            name = str(err_stat)
+        return False, str(name)
+    return True, None

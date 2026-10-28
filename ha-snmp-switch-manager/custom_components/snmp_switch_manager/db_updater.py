@@ -9,7 +9,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval, async_call_later
 from homeassistant.config_entries import ConfigEntry
-from .const import DOMAIN, GITHUB_BRANCH
+from .const import DOMAIN, DB_SOURCE_REPO, DB_SOURCE_BRANCH, DB_SOURCE_PATH
+from .database_builtin import merge_builtin
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +49,20 @@ def get_database_files(db_path: str | None = None) -> list[str]:
 
 DB_FILES = list(DEFAULT_DB_FILES)
 
-RAW_URL_ROOT = f"https://raw.githubusercontent.com/OtisPresley/snmp-switch-manager/{GITHUB_BRANCH}/custom_components/snmp_switch_manager/database/"
+def build_raw_url_root(
+    repo: str = DB_SOURCE_REPO,
+    branch: str = DB_SOURCE_BRANCH,
+    path: str = DB_SOURCE_PATH,
+) -> str:
+    """Return the raw.githubusercontent.com URL prefix of the database directory."""
+    repo = str(repo or DB_SOURCE_REPO).strip().strip("/")
+    branch = str(branch or DB_SOURCE_BRANCH).strip().strip("/")
+    path = str(path or DB_SOURCE_PATH).strip().strip("/")
+    return f"https://raw.githubusercontent.com/{repo}/{branch}/{path}/"
+
+
+# Database source (configurable in const.py: DB_SOURCE_REPO / DB_SOURCE_BRANCH)
+RAW_URL_ROOT = build_raw_url_root()
 
 
 async def async_check_and_update_db(hass: HomeAssistant) -> bool:
@@ -73,6 +87,10 @@ async def async_check_and_update_db(hass: HomeAssistant) -> bool:
                 content = await response.text()
                 # Parse to ensure it is valid JSON
                 new_data = json.loads(content)
+                # Keep built-in vendor entries (e.g. RLTech) in the stored file.
+                # Comparing the merged data also avoids a reload loop when the
+                # upstream file simply lacks the built-in entries.
+                new_data = merge_builtin(filename[:-5], new_data)
                 new_str = json.dumps(new_data, indent=2, sort_keys=True)
                 
                 # Load current local file

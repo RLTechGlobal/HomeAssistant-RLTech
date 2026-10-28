@@ -6,10 +6,11 @@ from datetime import timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 
 try:
     from homeassistant.components.http import StaticPathConfig
@@ -17,6 +18,12 @@ except ImportError:
     StaticPathConfig = None
 
 from .frontend import async_register_frontend
+from .database_builtin import (
+    LEGACY_VENDOR_ALIASES,
+    RLTECH_VENDOR,
+    is_rltech_vendor,
+    rltech_string_error,
+)
 from .const import (
     DOMAIN,
     PLATFORMS,
@@ -188,9 +195,51 @@ def _postprocess_if_names(
     return data
 
 
+def _migrate_legacy_override_vendors(overrides: dict) -> tuple[dict, bool]:
+    """Rename legacy vendor names (LEGACY_VENDOR_ALIASES) stored in feature overrides.
+
+    The stored vendor only pre-fills option forms / PR texts; renaming it keeps
+    those consistent with the current vendor name. Idempotent.
+    """
+    changed = False
+    out: dict = {}
+    for feature, cfg in (overrides or {}).items():
+        if not isinstance(cfg, dict):
+            out[feature] = cfg
+            continue
+        new_cfg = dict(cfg)
+        vendor = new_cfg.get("vendor")
+        if isinstance(vendor, str) and LEGACY_VENDOR_ALIASES.get(vendor.strip().lower()):
+            new_cfg["vendor"] = LEGACY_VENDOR_ALIASES[vendor.strip().lower()]
+            changed = True
+        vlist = new_cfg.get("vendors")
+        if isinstance(vlist, list):
+            renamed = []
+            for v in vlist:
+                nv = LEGACY_VENDOR_ALIASES.get(str(v).strip().lower(), v) if isinstance(v, str) else v
+                if nv not in renamed:
+                    renamed.append(nv)
+            if renamed != vlist:
+                new_cfg["vendors"] = renamed
+                changed = True
+        out[feature] = new_cfg
+    return out, changed
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: SwitchManagerConfigEntry
 ) -> bool:
+    # One-time rename of legacy vendor names kept in the options. Done before
+    # the update listener is registered, so it does not trigger a reload.
+    overrides = entry.options.get(CONF_FEATURE_OVERRIDES)
+    if isinstance(overrides, dict) and overrides:
+        migrated, changed = _migrate_legacy_override_vendors(overrides)
+        if changed:
+            _LOGGER.info("Renaming legacy vendor name in feature overrides of %s", entry.title)
+            hass.config_entries.async_update_entry(
+                entry, options={**entry.options, CONF_FEATURE_OVERRIDES: migrated}
+            )
+
     snmp_settings = get_snmp_connection_settings(entry.data, entry.options)
     host = snmp_settings.get("host")
 
@@ -427,6 +476,12 @@ async def async_register_services(hass: HomeAssistant):
         except Exception:
             return
 
+        # RLTech firmware rejects characters it cannot store safely; tell
+        # the user why instead of failing silently with an SNMP wrongValue.
+        if is_rltech_vendor(client.cache.get("vendor")):
+            if err := rltech_string_error(description):
+                raise ServiceValidationError(f"Port description not accepted: {err}")
+
         await client.set_alias(if_index, description)
         await runtime.coordinator.async_request_refresh()
 
@@ -477,6 +532,10 @@ async def async_register_services(hass: HomeAssistant):
             target_oid = client._custom_oid("contact") or OID_sysContact
         elif oid == OID_sysLocation:
             target_oid = client._custom_oid("location") or OID_sysLocation
+
+        if is_rltech_vendor(client.cache.get("vendor")):
+            if err := rltech_string_error(value):
+                raise ServiceValidationError(f"Value not accepted: {err}")
 
         await client.set_system_string(target_oid, value)
         await runtime.coordinator.async_request_refresh()
@@ -657,6 +716,62 @@ async def async_register_services(hass: HomeAssistant):
             if if_index in client.cache.setdefault("ifTable", {}):
                 client.cache["ifTable"][if_index]["admin"] = val
             await runtime.coordinator.async_request_refresh()
+
+    async def handle_save_config(call: ServiceCall) -> ServiceResponse:
+        """Write the running configuration of an RLTech switch to flash."""
+        from homeassistant.helpers import device_registry as dr
+
+        device_id = call.data.get("device_id")
+        if isinstance(device_id, (list, set, tuple)):
+            device_id = next(iter(device_id), None)
+        if not device_id:
+            raise ServiceValidationError("device_id is required")
+
+        device = dr.async_get(hass).async_get(device_id)
+        if not device:
+            raise ServiceValidationError(f"Unknown device: {device_id}")
+
+        runtime: SnmpSwitchRuntimeData | None = None
+        for entry_id_cand in device.config_entries:
+            config_entry = hass.config_entries.async_get_entry(entry_id_cand)
+            if config_entry and config_entry.domain == DOMAIN:
+                runtime = getattr(config_entry, "runtime_data", None)
+                break
+        if not runtime:
+            raise ServiceValidationError(
+                f"Device {device.name or device_id} is not a loaded SNMP Switch Manager device"
+            )
+
+        client = runtime.client
+        if not is_rltech_vendor(client.cache.get("vendor")) or not client.cache.get(
+            "cfgsave_supported"
+        ):
+            raise ServiceValidationError(
+                f"Device {device.name or device_id} does not support saving the "
+                f"configuration via SNMP (only {RLTECH_VENDOR} switches with a "
+                "firmware that provides the RLTECH-MW-MIB save object)"
+            )
+
+        wait = bool(call.data.get("wait", True))
+        try:
+            result = await client.save_config(wait=wait)
+        finally:
+            await runtime.coordinator.async_request_refresh()
+        return {"result": result}
+
+    if not hass.services.has_service(DOMAIN, "save_config"):
+        hass.services.async_register(
+            DOMAIN,
+            "save_config",
+            handle_save_config,
+            schema=vol.Schema(
+                {
+                    vol.Required("device_id"): vol.Any(cv.string, [cv.string]),
+                    vol.Optional("wait", default=True): cv.boolean,
+                }
+            ),
+            supports_response=SupportsResponse.OPTIONAL,
+        )
 
     if not hass.services.has_service(DOMAIN, "set_port_description"):
         hass.services.async_register(DOMAIN, "set_port_description", handle_set_alias)

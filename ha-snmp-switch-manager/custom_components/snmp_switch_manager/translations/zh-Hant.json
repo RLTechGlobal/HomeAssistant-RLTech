@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "SNMP 社群字串（讀寫社群字串用於寫入別名）"
+          "community": "SNMP 社群字串（讀寫社群字串用於寫入別名）",
+          "write_community": "SNMP 寫入社群字串（選填；用於連接埠開關、別名等寫入操作，留空則使用上方的社群字串）"
         },
         "description": "提供 SNMP v2c 社群字串。\n\n如果出現驗證錯誤，請核對設備上的社群字串。",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "SNMP 版本",
           "override_community": "SNMP v2c — 社群字串覆寫（選填）",
+          "write_community": "SNMP v2c — 寫入社群字串（選填；用於 SET 請求。留空 = 使用初始設定中的值，若無則使用讀取社群字串）",
+          "clear_write_community": "SNMP v2c — 清除初始設定中的寫入社群字串（SET 改用讀取社群字串）",
           "override_port": "SNMP v2c — 埠號覆寫（選填）",
           "uptime_poll_interval": "運作時間重新整理間隔（秒）",
           "snmpv3_username": "SNMP v3 — 用戶名稱（選填）",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "屬性（無歷史記錄）",
         "sensors": "感測器（歷史記錄）"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "儲存設定",
+      "description": "將 RLTech 交換器的執行設定寫入 Flash（等同於交換器網頁上的「儲存」）。透過 SNMP 所做的變更在儲存前重新開機會遺失。最多每 10 秒儲存一次，每小時最多 30 次。",
+      "fields": {
+        "device_id": {
+          "name": "交換器裝置",
+          "description": "要儲存設定的 RLTech 交換器"
+        },
+        "wait": {
+          "name": "等待完成",
+          "description": "等交換器確認設定已寫入 Flash 後再返回（否則在儲存請求被受理後立即返回）。"
+        }
       }
     }
   },

@@ -1,0 +1,155 @@
+RLTECH-MW-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE
+        FROM SNMPv2-SMI
+    TimeStamp
+        FROM SNMPv2-TC
+    MODULE-COMPLIANCE, OBJECT-GROUP
+        FROM SNMPv2-CONF
+    rltMgmt
+        FROM RLTECH-SMI;
+
+rltMwMIB MODULE-IDENTITY
+    LAST-UPDATED "202610220000Z"
+    ORGANIZATION "RLTech"
+    CONTACT-INFO
+        "RLTech
+         Web: <TODO: company URL>"
+    DESCRIPTION
+        "Private objects of the RLTech managed switch firmware.
+
+         Configuration persistence: every SNMP SET of a standard object
+         (for example ifAdminStatus, ifAlias or sysName) only changes
+         the running configuration of the switch; the change is lost at
+         the next reboot unless the running configuration is saved.
+         rltMwCfgSaveAction is the only SNMP object that saves it."
+    REVISION    "202610220000Z"
+    DESCRIPTION
+        "Initial version: configuration save objects."
+    ::= { rltMgmt 1 }
+
+-- Reserved for SNMPv2 notifications (RFC 2578 section 8.5); this
+-- revision defines none.
+rltMwNotifications  OBJECT IDENTIFIER ::= { rltMwMIB 0 }
+rltMwObjects        OBJECT IDENTIFIER ::= { rltMwMIB 1 }
+rltMwConformance    OBJECT IDENTIFIER ::= { rltMwMIB 2 }
+
+-- rltMwObjects.1   rltMwSystem
+-- rltMwObjects.2   reserved (per-port objects)
+-- rltMwObjects.3   reserved (layer 2 extensions)
+-- rltMwObjects.4   reserved (PoE)
+rltMwSystem         OBJECT IDENTIFIER ::= { rltMwObjects 1 }
+
+-- rltMwSystem.1    rltMwConfig
+-- rltMwSystem.2    reserved (system environment, e.g. temperature)
+rltMwConfig         OBJECT IDENTIFIER ::= { rltMwSystem 1 }
+
+--
+-- Configuration save
+--
+
+rltMwCfgSaveAction OBJECT-TYPE
+    SYNTAX      INTEGER {
+                    save(1),
+                    noOp(2)
+                }
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Writing save(1) saves the running configuration as the startup
+         configuration, with the same effect as saving the configuration
+         in the web interface of the switch. Writing noOp(2) is accepted
+         and does nothing. Reading always returns noOp(2).
+
+         The save runs asynchronously: a successful SET response only
+         means that the request was accepted. Its outcome is reported
+         by rltMwCfgSaveStatus (inProgress, then success or failed).
+
+         The SET is refused with
+           wrongValue           for any value other than save(1) or
+                                noOp(2);
+           inconsistentValue    when a save started via SNMP is still in
+                                progress;
+           resourceUnavailable  when less than 10 seconds have passed
+                                since the previous accepted save, or 30
+                                saves have already been accepted within
+                                the last 60 minutes (sliding window;
+                                flash wear protection).
+         SNMPv1 requests receive the corresponding SNMPv1 error codes.
+         Only the write community may set this object.
+
+         Requests are processed in the order they are received. To make
+         sure that changes sent in the same PDU are saved as well, send
+         save(1) in a PDU of its own after the changes, or as the last
+         variable binding of the PDU."
+    ::= { rltMwConfig 1 }
+
+rltMwCfgSaveStatus OBJECT-TYPE
+    SYNTAX      INTEGER {
+                    idle(1),
+                    inProgress(2),
+                    success(3),
+                    failed(4)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "State of the most recent configuration save started through
+         rltMwCfgSaveAction:
+           idle(1)        no save has been started via SNMP since the
+                          switch started;
+           inProgress(2)  a save has been accepted and is running;
+           success(3)     the last save completed successfully;
+           failed(4)      the last save failed, could not be started,
+                          or did not complete within 30 seconds.
+
+         Saves started from the web interface or the command line are
+         not reflected in this object. Reading it never waits for a
+         running save."
+    ::= { rltMwConfig 2 }
+
+rltMwCfgSaveLastTime OBJECT-TYPE
+    SYNTAX      TimeStamp
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The value of sysUpTime when the most recent configuration save
+         started through rltMwCfgSaveAction completed successfully, or
+         zero if no such save has completed since the switch started.
+         Saves started from the web interface or the command line are
+         not reflected in this object."
+    ::= { rltMwConfig 3 }
+
+-- rltMwConfig.4 and above: reserved (e.g. save counter, unsaved
+-- changes indication, failure reason).
+
+--
+-- Conformance
+--
+
+rltMwCompliances    OBJECT IDENTIFIER ::= { rltMwConformance 1 }
+rltMwGroups         OBJECT IDENTIFIER ::= { rltMwConformance 2 }
+
+rltMwCompliance MODULE-COMPLIANCE
+    STATUS      current
+    DESCRIPTION
+        "The compliance statement for RLTech managed switches that
+         implement this MIB module."
+    MODULE  -- this module
+        MANDATORY-GROUPS { rltMwCfgSaveGroup }
+    ::= { rltMwCompliances 1 }
+
+rltMwCfgSaveGroup OBJECT-GROUP
+    OBJECTS     {
+                    rltMwCfgSaveAction,
+                    rltMwCfgSaveStatus,
+                    rltMwCfgSaveLastTime
+                }
+    STATUS      current
+    DESCRIPTION
+        "Objects to save the running configuration and to monitor the
+         result."
+    ::= { rltMwGroups 1 }
+
+END

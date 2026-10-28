@@ -7,6 +7,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- 🏭 **RLTech switch support (`database/*.json`, `database_builtin.py`)**: RLTech managed switches (MW firmware, EN8851 / AN8858) are detected via the sysObjectID prefix `1.3.6.1.4.1.62570`, with the `en8851` / `an8858` sysDescr keywords as a fallback; model / firmware / manufacturer come from the ENTITY-MIB chassis row (`entPhysicalModelName.1`, `entPhysicalSoftwareRev.1`, `entPhysicalMfgName.1`). RLTech is also added to the standard base MAC / FDB / LLDP entries. Database files or feature overrides written by development builds under the earlier vendor name are renamed automatically.
+- 💾 **Save configuration for RLTech switches (`button.py`, `save_config` service, `sensor/cfgsave.py`)**: SNMP changes (port enable/disable, descriptions, system name) only change the running configuration. A new *Save Configuration* button and the `snmp_switch_manager.save_config` service (`wait`, returns `result: success | accepted`) write it to flash; two diagnostic sensors show the save status (`idle / in_progress / success / failed`) and the time of the last save. Heavy polling pauses while a save runs. Only created when the firmware provides the RLTECH-MW-MIB save object.
+- 📚 **MIB files (`mibs/RLTECH-SMI.mib`, `mibs/RLTECH-MW-MIB.mib`)**: Enterprise OID tree and the save-configuration objects, loadable by net-snmp and other managers.
+- 🔑 **Optional SNMP v2c write community (`write_community`)**: New optional field in the SNMP v2c setup step and in *Connection & Name* options. When set, all SET requests (port enable/disable, alias, PoE, system strings) use it; when blank the read community is used as before. In options, leaving it blank keeps the value from initial setup; tick *Clear the write community from initial setup* to fall back to the read community.
+- 🔁 **Configurable database source (`const.py`: `DB_SOURCE_REPO`, `DB_SOURCE_BRANCH`, `DB_SOURCE_PATH`)**: The automatic database updater can be pointed at a fork. Defaults are unchanged (upstream `main`).
+
+### Fixed
+- 🛡️ **Built-in vendor entries survive automatic database updates**: Entries from `database_builtin.py` are merged into downloaded files before they are compared/written and again when the database is loaded, so an update can no longer drop them (and an upstream file that merely lacks them no longer triggers a reload).
+- ✍️ **RLTech string validation (`__init__.py`)**: `set_port_description` / `set_system_*` reject characters the RLTech firmware refuses (non-printable/non-ASCII, `" \ { }`, more than 32 characters) with a clear service validation error instead of a silent SNMP failure.
+- 🧭 **sysObjectID prefix matching on arc boundary (`snmp.py`)**: Prefix `1.3.6.1.4.1.9` no longer matches `1.3.6.1.4.1.99…`.
+
+---
+
 ## [0.6.10] - 2026-10-17
 
 ### Fixed

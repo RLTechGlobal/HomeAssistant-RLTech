@@ -83,7 +83,8 @@
       },
       "snmpv2c": {
         "data": {
-          "community": "SNMP-community (RW voor alias-schrijven)"
+          "community": "SNMP-community (RW voor alias-schrijven)",
+          "write_community": "SNMP-schrijfcommunity (optioneel; voor poort aan/uit, alias en andere schrijfacties — leeg = bovenstaande community)"
         },
         "description": "Geef de SNMP v2c-community op.\n\nAls je een authenticatiefout ziet, controleer dan de community-string op het apparaat.",
         "title": "SNMP v2c"
@@ -204,6 +205,8 @@
         "data": {
           "snmp_version": "SNMP-versie",
           "override_community": "SNMP v2c — Community-overschrijving (optioneel)",
+          "write_community": "SNMP v2c — Schrijfcommunity (optioneel; voor SET-verzoeken. Leeg = waarde uit de eerste installatie, anders leescommunity)",
+          "clear_write_community": "SNMP v2c — Schrijfcommunity uit de eerste installatie wissen (SET gebruikt dan de leescommunity)",
           "override_port": "SNMP v2c — Poort-overschrijving (optioneel)",
           "uptime_poll_interval": "Uptime-verversinterval (seconden)",
           "snmpv3_username": "SNMP v3 — Gebruikersnaam (optioneel)",
@@ -657,6 +660,22 @@
       "options": {
         "attributes": "Attributen (geen geschiedenis)",
         "sensors": "Sensoren (geschiedenis)"
+      }
+    }
+  },
+  "services": {
+    "save_config": {
+      "name": "Configuratie opslaan",
+      "description": "Schrijft de actieve configuratie van een RLTech-switch naar het flashgeheugen (zoals \"Opslaan\" in de webinterface van de switch). Wijzigingen via SNMP gaan bij een herstart verloren zolang ze niet zijn opgeslagen. Maximaal één keer per 10 seconden en 30 keer per uur.",
+      "fields": {
+        "device_id": {
+          "name": "Switch-apparaat",
+          "description": "De RLTech-switch waarvan de configuratie wordt opgeslagen"
+        },
+        "wait": {
+          "name": "Wachten op voltooiing",
+          "description": "Wachten tot de switch bevestigt dat de configuratie naar flash is geschreven (anders direct terugkeren zodra het verzoek is geaccepteerd)."
+        }
       }
     }
   },

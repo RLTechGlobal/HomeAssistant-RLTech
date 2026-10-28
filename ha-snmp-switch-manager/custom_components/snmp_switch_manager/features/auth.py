@@ -15,6 +15,7 @@ from ..snmp_compat import (
 from ..const import (
     SNMP_VERSION_V2C,
     SNMP_VERSION_V3,
+    CONF_WRITE_COMMUNITY,
     CONF_SNMPV3_USERNAME,
     CONF_SNMPV3_AUTH_PROTOCOL,
     CONF_SNMPV3_AUTH_PASSWORD,
@@ -80,3 +81,20 @@ def build_auth_data(settings: Dict[str, Any]):
     except Exception:
         # Fall back to the safest noAuthNoPriv when input is invalid.
         return UsmUserData(username)
+
+
+def build_write_auth_data(settings: Dict[str, Any]):
+    """Build the authData used for SNMP SET requests.
+
+    SNMP v2c agents commonly accept GET only with the read community and SET
+    only with the write community. When a write community is configured it is
+    used for SET; otherwise this falls back to the regular (read) credentials,
+    which keeps the previous single-community behaviour. SNMP v3 always uses
+    the same USM user for reads and writes.
+    """
+    version = str((settings or {}).get("version") or SNMP_VERSION_V2C).lower()
+    if version != SNMP_VERSION_V3:
+        write_community = str((settings or {}).get(CONF_WRITE_COMMUNITY) or "").strip()
+        if write_community:
+            return CommunityData(write_community, mpModel=1)
+    return build_auth_data(settings)

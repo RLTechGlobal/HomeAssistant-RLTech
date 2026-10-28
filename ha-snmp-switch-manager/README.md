@@ -23,6 +23,7 @@ SNMP Switch Manager discovers and monitors SNMP-enabled managed switches and net
 - [📘 Documentation](#-documentation)
 - [⚡ Active Port & PoE Control](#-active-port--poe-control)
 - [🏷️ Services](#️-services)
+- [💾 RLTech Switches: Saving the Configuration](#-rltech-switches-saving-the-configuration)
 - [🔧 Troubleshooting & Support](#-troubleshooting--support)
 - [🛣️ Roadmap & Changelog](#️-roadmap--changelog)
 
@@ -184,6 +185,49 @@ data:
   device_id: "f83a45c3de722784b2abce8e001"
   value: "Server Rack A"
 ```
+
+---
+
+## 💾 RLTech Switches: Saving the Configuration
+
+RLTech managed switches (MW firmware, EN8851 / AN8858) are recognised automatically (sysObjectID `1.3.6.1.4.1.62570.*`). On these switches every change made through this integration — port enable/disable, port descriptions, system name — only changes the **running configuration**. It is lost when the switch reboots unless it is saved to flash.
+
+With a firmware that provides the RLTECH-MW-MIB save object, the device gets:
+
+- a **Save Configuration** button (configuration entity),
+- two diagnostic sensors: **Configuration Save Status** (`idle`, `in_progress`, `success`, `failed`) and **Configuration Last Saved** (time of the last save made via SNMP since the switch booted),
+- the service below.
+
+The status and time only reflect saves started via SNMP (this integration or another SNMP manager); a save made in the switch web UI is not shown. While a save runs, port polling pauses for a few seconds so the switch is not marked offline. SET requests need the **write community** (setup step or *Connection & Name* options).
+
+#### Service: `snmp_switch_manager.save_config`
+```yaml
+service: snmp_switch_manager.save_config
+data:
+  device_id: "f83a45c3de722784b2abce8e001"
+  wait: true          # default: return once the switch confirms the write to flash
+response_variable: save   # optional: save.result is "success" (or "accepted" with wait: false)
+```
+
+The switch accepts **at most one save every 10 seconds and 30 per hour** (flash wear protection); requests above that fail with "saved too often". Do not save from automations that fire on every change. Instead, save once after the changes have settled, for example:
+
+```yaml
+automation:
+  - alias: "Save switch configuration 30 s after a port change"
+    mode: restart            # every new change restarts the 30 s delay
+    trigger:
+      - platform: state
+        entity_id:
+          - switch.core_sw_port_1
+          - switch.core_sw_port_2
+    action:
+      - delay: "00:00:30"
+      - service: snmp_switch_manager.save_config
+        data:
+          device_id: "f83a45c3de722784b2abce8e001"
+```
+
+MIB files for network management tools are in [`mibs/`](./mibs/).
 
 ---
 
