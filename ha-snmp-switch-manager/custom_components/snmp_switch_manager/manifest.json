@@ -1,0 +1,26 @@
+{
+  "domain": "snmp_switch_manager",
+  "name": "SNMP Switch Manager",
+  "after_dependencies": [
+    "http"
+  ],
+  "codeowners": [
+    "@OtisPresley"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "documentation": "https://github.com/OtisPresley/snmp-switch-manager",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/OtisPresley/snmp-switch-manager/issues",
+  "loggers": [
+    "pysnmp"
+  ],
+  "requirements": [
+    "pysnmp>=6.2.6"
+  ],
+  "version": "0.6.10"
+}

@@ -1,0 +1,87 @@
+{
+  "virtual_iftypes": [
+    24,
+    53,
+    135,
+    161,
+    131
+  ],
+  "virtual_tokens": [
+    "vlan",
+    "loopback",
+    "mgmt",
+    "management",
+    "irb",
+    "bdi",
+    "svi",
+    "bridge",
+    "port-channel",
+    "bond",
+    "lag",
+    "gre",
+    "gif",
+    "faith",
+    "enc",
+    "pflog",
+    "pfsync",
+    "ovpn",
+    "openvpn",
+    "wg",
+    "wireguard",
+    "tun",
+    "tap"
+  ],
+  "physical_tokens": [
+    "gigabit",
+    "gige",
+    "gi",
+    "fastethernet",
+    "fa",
+    "ethernet",
+    "eth",
+    "tengig",
+    "ten",
+    "te",
+    "ge",
+    "xe",
+    "tw",
+    "fi",
+    "hu",
+    "em",
+    "igb",
+    "igc",
+    "ix",
+    "ax",
+    "re",
+    "vtnet",
+    "vmx",
+    "hn",
+    "bge",
+    "bce",
+    "mlx",
+    "sfp"
+  ],
+  "abbreviations": {
+    "prefixes": {
+      "gi": "Gi",
+      "te": "Te",
+      "tw": "Tw",
+      "fa": "Fa",
+      "fi": "Fi",
+      "hu": "Hu",
+      "lo": "Lo",
+      "vl": "Vl"
+    },
+    "startswith": {
+      "po": "Po",
+      "port-channel": "Po",
+      "portchannel": "Po"
+    },
+    "contains": {
+      "100g": "Hu",
+      "10g": "Te",
+      "20g": "Tw"
+    },
+    "default": "Gi"
+  }
+}

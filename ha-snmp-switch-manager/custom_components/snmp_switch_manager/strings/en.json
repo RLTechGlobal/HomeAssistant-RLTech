@@ -1,0 +1,664 @@
+{
+  "config": {
+    "error": {
+      "cannot_connect": "Cannot connect or SNMP timed out",
+      "required": "Required",
+      "invalid_password_length": "Password must be 8–31 characters"
+    },
+    "step": {
+      "bandwidth_enable_disable": {
+        "data": {
+          "bw_mode": "Bandwidth data as",
+          "enable_bandwidth_sensors": "Enable bandwidth sensors"
+        },
+        "description": "Enable bandwidth collection for this device.\n\nIf you choose Attributes, bandwidth values are added to port entities (no history).\nIf you choose Sensors, separate bandwidth sensors are created (history).",
+        "title": "Bandwidth Sensors"
+      },
+      "bandwidth_poll_interval": {
+        "data": {
+          "bandwidth_poll_interval": "Poll interval (seconds)"
+        },
+        "description": "Set the polling interval used to calculate bandwidth/traffic.",
+        "title": "Bandwidth Sensors"
+      },
+      "bandwidth_sensors": {
+        "description": "Enable optional RX/TX throughput and total traffic sensors for selected interfaces.",
+        "menu_options": {
+          "back": "Back",
+          "bandwidth_enable_disable": "Enable / Disable",
+          "bandwidth_exclude_rules": "Exclude Rules",
+          "bandwidth_include_rules": "Include Rules",
+          "bandwidth_poll_interval": "Poll interval"
+        },
+        "title": "Bandwidth Sensors"
+      },
+      "environmental_enable_disable": {
+        "data": {
+          "env_enabled": "Enable environmental sensors",
+          "env_mode": "Environmental data as",
+          "poe_enabled": "Enable PoE sensors",
+          "poe_mode": "PoE data as",
+          "poe_per_port_power": "Create per-port PoE Power sensors",
+          "poe_control_loops": "PoE Control Loops"
+        },
+        "description": "Enable environmental/PoE monitoring for this device.\n\nIf you choose Attributes, values are added to port entities (no history).\nIf you choose Sensors, separate sensor entities are created (history).",
+        "title": "Environmental Sensors"
+      },
+      "environmental_sensors": {
+        "description": "Enable optional environmental and PoE monitoring for this device.",
+        "menu_options": {
+          "back": "Back",
+          "environmental_enable_disable": "Enable / Disable"
+        },
+        "title": "Environmental Sensors"
+      },
+      "init": {
+        "description": "Manage per-device overrides and advanced settings.",
+        "menu_options": {
+          "bandwidth_sensors": "Bandwidth Sensors",
+          "connection_overrides": "Connection & Naming Overrides",
+          "environmental_sensors": "Environmental Sensors",
+          "manage_interfaces": "Manage Interfaces"
+        },
+        "title": "Device Options"
+      },
+      "manage_interfaces": {
+        "menu_options": {
+          "back": "Back",
+          "builtin_filters": "Built-in Vendor Filters",
+          "interface_exclude_rules": "Excluded Interfaces",
+          "interface_include_rules": "Included Interfaces",
+          "port_name_rules": "Interface Name Rules"
+        },
+        "title": "Manage Interfaces"
+      },
+      "user": {
+        "data": {
+          "host": "Host/IP",
+          "port": "Port",
+          "snmp_version": "SNMP version"
+        },
+        "description": "Choose SNMP version and provide connection details.",
+        "title": "Connect to your switch"
+      },
+      "snmpv2c": {
+        "data": {
+          "community": "SNMP community (RW for alias writes)"
+        },
+        "description": "Provide SNMP v2c community.\n\nIf you see an authentication error, confirm the community string on the device.",
+        "title": "SNMP v2c"
+      },
+      "snmpv3": {
+        "data": {
+          "snmpv3_username": "SNMPv3 username",
+          "snmpv3_auth_protocol": "Authentication protocol",
+          "snmpv3_auth_password": "Authentication password",
+          "snmpv3_priv_protocol": "Privacy protocol",
+          "snmpv3_priv_password": "Privacy password"
+        },
+        "description": "Provide SNMP v3 credentials.\n\n- **Authentication protocol:** HMAC-SHA or HMAC-MD5\n- **Privacy protocol:** None or CBC-DES (device dependent)\n\nMany devices require passwords between 8 and 31 characters and may reject special characters.",
+        "title": "SNMP v3"
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "invalid_oid": "Invalid OID format (must be numeric dotted OID)",
+      "invalid_poll_interval": "Invalid poll interval",
+      "invalid_port": "Invalid port",
+      "invalid_regex": "Invalid regex pattern",
+      "invalid_uptime_interval": "Invalid uptime refresh interval",
+      "required": "Required",
+      "invalid_password_length": "Password must be 8–31 characters",
+      "required_attestation": "You must attest that you have tested the OID",
+      "authorization_pending": "Authorization pending. Please enter the code on GitHub and try again.",
+      "github_error": "Failed to communicate with GitHub. Please try again later.",
+      "required_share": "Since you verified the OID, please also select the option to share it with the community to help others.",
+      "required_attestation_to_share": "You must attest that you have tested the OID before sharing it with the community.",
+      "required_all_attestations_to_share": "You must check all three attestation checkboxes to submit to GitHub.",
+      "duplicate_oid": "This OID already exists in the database for this vendor.",
+      "invalid_float": "Invalid numeric scale factor (must be a float like 1.0 or 0.1)",
+      "either_percentage_or_free_total": "Please provide either Memory Usage Percentage OID OR both Free and Total Memory OIDs, not both."
+    },
+    "step": {
+      "bandwidth_enable": {
+        "data": {
+          "enable_bandwidth_sensors": "Enable bandwidth sensors"
+        },
+        "description": "Turn bandwidth sensor entities on or off for this device.",
+        "title": "Bandwidth Sensors"
+      },
+      "bandwidth_enable_disable": {
+        "data": {
+          "bw_mode": "Bandwidth data as",
+          "enable_bandwidth_sensors": "Enable bandwidth collection",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nEnable bandwidth collection for this device.\n\nIf you choose **Attributes**, bandwidth values are added to port entities (no history).\nIf you choose **Sensors**, separate bandwidth sensors are created (history).",
+        "title": "Bandwidth Sensors"
+      },
+      "bandwidth_exclude_rules": {
+        "data": {
+          "rule_action": "Action",
+          "rule_existing": "Existing rule",
+          "rule_match": "Match",
+          "rule_new_value": "New value",
+          "rule_value": "Value",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nAdd or remove exclude rules. Exclude rules always take precedence.",
+        "title": "Bandwidth Sensor Exclude Rules"
+      },
+      "bandwidth_icons": {
+        "data": {
+          "bw_rx_throughput_icon": "RX Throughput icon",
+          "bw_rx_total_icon": "RX Total icon",
+          "bw_tx_throughput_icon": "TX Throughput icon",
+          "bw_tx_total_icon": "TX Total icon",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Optional icon overrides for bandwidth sensors. Leave blank to use defaults.",
+        "title": "Bandwidth Sensor Icons"
+      },
+      "bandwidth_include_rules": {
+        "data": {
+          "rule_action": "Action",
+          "rule_existing": "Existing rule",
+          "rule_match": "Match",
+          "rule_new_value": "New value",
+          "rule_value": "Value",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nAdd or remove include rules. If any include rules are set, only matching interfaces will get bandwidth sensors.",
+        "title": "Bandwidth Sensor Include Rules"
+      },
+      "bandwidth_poll_interval": {
+        "data": {
+          "bandwidth_poll_interval": "Poll interval (seconds)",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Set the poll interval for bandwidth sensors. Lower intervals update more often but increase SNMP load.",
+        "title": "Bandwidth Sensors"
+      },
+      "bandwidth_sensors": {
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nEnable optional RX/TX throughput and total traffic sensors for selected interfaces.",
+        "menu_options": {
+          "back": "Back",
+          "bandwidth_enable_disable": "Enable / Disable",
+          "bandwidth_exclude_rules": "Exclude Rules",
+          "bandwidth_icons": "Bandwidth Sensor Icons",
+          "bandwidth_include_rules": "Include Rules",
+          "bandwidth_poll_interval": "Poll Interval"
+        },
+        "title": "Bandwidth Sensors"
+      },
+      "builtin_filters": {
+        "data": {
+          "disabled_vendor_filter_rule_ids": "Disabled built-in filter rules",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Enable or disable built-in vendor interface filter rules for this device.\n\nDisabled rules will not be applied during interface discovery.",
+        "title": "Built-in Vendor Filters"
+      },
+      "connection_and_naming_overrides": {
+        "data": {
+          "snmp_version": "SNMP version",
+          "override_community": "SNMP v2c — Community override (optional)",
+          "override_port": "SNMP v2c — Port override (optional)",
+          "uptime_poll_interval": "Uptime refresh interval (seconds)",
+          "snmpv3_username": "SNMP v3 — Username (optional)",
+          "snmpv3_auth_protocol": "SNMP v3 — Authentication protocol (optional)",
+          "snmpv3_auth_password": "SNMP v3 — Authentication password (optional)",
+          "snmpv3_priv_protocol": "SNMP v3 — Privacy protocol (optional)",
+          "snmpv3_priv_password": "SNMP v3 — Privacy password (optional)",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read Connection & Name Guide]({connection_guide_url})**\n\nOptional per-device overrides. Leave blank to use values from initial setup.\n\n### SNMP Version\nAll fields are always visible due to Home Assistant limitations. Only the selected **SNMP version** determines which fields are used.\n\n### SNMP v2c\nUse **SNMP community override** and **SNMP port override** only if you need to override initial setup values.\n\n### SNMP v3\nFill in **SNMPv3 username** and authentication/privacy settings when SNMP v3 is selected. Many devices require passwords between 8 and 31 characters and may reject special characters.",
+        "title": "Connection & Name"
+      },
+      "feature_overrides": {
+        "description": "👉 **[📘 Read Custom OID Overrides Guide]({custom_oid_guide_url})**\n\nManage custom OID overrides for specific features.",
+        "menu_options": {
+          "override_power": "Override Power",
+          "back": "Back",
+          "override_cpu": "Override CPU",
+          "override_memory": "Override Memory",
+          "override_fans": "Override Fans",
+          "override_psu": "Override PSU",
+          "override_temperature": "Override Temperature",
+          "override_poe": "Override PoE",
+          "override_device_info": "Override Device Info",
+          "override_lldp": "Override LLDP",
+          "override_fdb": "Override FDB",
+          "override_arp": "Override ARP",
+          "override_base_mac": "Override Base MAC"
+        },
+        "title": "Feature OID Overrides"
+      },
+      "override_cpu": {
+        "data": {
+          "oid": "CPU OID",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "scale": "Scale",
+          "unit": "Unit",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read CPU Override Guide]({custom_oid_guide_url})**\n\nOverride the CPU OID for this device. Leave this field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override CPU"
+      },
+      "override_memory": {
+        "data": {
+          "oid": "Memory Usage Percentage OID",
+          "oid_free": "Free Memory OID",
+          "oid_total": "Total Memory OID",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "scale": "Scale"
+        },
+        "description": "👉 **[📘 Read Memory Override Guide]({custom_oid_guide_url})**\n\nOverride the Memory OIDs for this device. Enter either a single Memory Usage Percentage OID OR both Free and Total Memory OIDs. Leave all fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override Memory"
+      },
+      "override_fans": {
+        "data": {
+          "oid_rpm": "Fan RPM OID (optional)",
+          "oid_status": "Fan Status OID (optional)",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "scale": "Scale"
+        },
+        "description": "👉 **[📘 Read Fans Override Guide]({custom_oid_guide_url})**\n\nOverride the Fan OIDs for this device. Leave both fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override Fans"
+      },
+      "override_psu": {
+        "data": {
+          "oid_status": "PSU Status OID",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "oid_label": "Label OID (optional)",
+          "filter": "Filter (optional)",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read PSU Override Guide]({custom_oid_guide_url})**\n\nOverride the PSU OIDs for this device. Leave this field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override PSU"
+      },
+      "override_temperature": {
+        "data": {
+          "oid": "Temperature OID",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "oid_state": "State OID (optional)",
+          "oid_label": "Label OID (optional)",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "scale": "Scale"
+        },
+        "description": "👉 **[📘 Read Temperature Override Guide]({custom_oid_guide_url})**\n\nOverride the Temperature OIDs for this device. Leave the main Temperature OID field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override Temperature"
+      },
+      "ask_pr": {
+        "data": {
+          "submit": "Submit override to GitHub"
+        },
+        "description": "Do you want to submit this override to the repository to help other users?",
+        "title": "Submit to GitHub?"
+      },
+      "submit_pr": {
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nTo submit your override, please authenticate with GitHub:\n\n1. Go to [github.com/login/device]({url}) (opens in a new tab)\n2. Copy and enter code: `{code}`\n3. Once you get the green check on GitHub, click Submit.",
+        "title": "Authenticate with GitHub",
+        "data": {
+          "authorized": "I have authorized this on GitHub",
+          "back_to_menu": "Go back (discard changes)"
+        }
+      },
+      "create_pr": {
+        "description": "{status}",
+        "title": "PR Status"
+      },
+      "device_options": {
+        "description": "Manage per-device overrides and advanced settings.",
+        "menu_options": {
+          "bandwidth_sensors": "Bandwidth Sensors",
+          "connection_and_naming_overrides": "Connection & Name",
+          "environmental_sensors": "Environmental Sensors",
+          "feature_overrides": "Feature OID Overrides",
+          "manage_interfaces": "Manage Interfaces"
+        },
+        "title": "Device Options"
+      },
+      "entity_icon_rules": {
+        "data": {
+          "icon_action": "Action",
+          "icon_existing": "Existing rule",
+          "icon_icon": "Icon (e.g., mdi:ethernet)",
+          "icon_match": "Match type",
+          "icon_value": "Match value",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Override interface entity icons based on interface name matching.",
+        "title": "Entity Icon Rules"
+      },
+      "environmental_enable_disable": {
+        "data": {
+          "env_enabled": "Enable environmental sensors",
+          "env_mode": "Environmental data as",
+          "poe_enabled": "Enable PoE statistics",
+          "poe_mode": "PoE data as",
+          "poe_per_port_power": "Create per-port PoE Power sensors",
+          "back_to_menu": "Go back (discard changes)",
+          "poe_control_loops": "PoE Control Loops"
+        },
+        "description": "👉 **[📘 Read Environmental Sensors Guide]({env_guide_url})**\n\nChoose whether environmental/PoE data is stored as attributes (no history) or separate sensors (history).",
+        "title": "Environmental Sensors"
+      },
+      "environmental_poll_interval": {
+        "data": {
+          "env_poll_interval": "Polling interval",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "How often to poll environmental values (in seconds).",
+        "title": "Environmental polling interval"
+      },
+      "environmental_sensors": {
+        "description": "👉 **[📘 Read Environmental Sensors Guide]({env_guide_url})**\n\nEnable optional environmental and PoE monitoring for this device.",
+        "menu_options": {
+          "back": "Back",
+          "environmental_enable_disable": "Enable / Disable",
+          "environmental_poll_interval": "Environmental polling interval",
+          "poe_poll_interval": "PoE polling interval"
+        },
+        "title": "Environmental Sensors"
+      },
+      "exclude_rules": {
+        "data": {
+          "rule_action": "Action",
+          "rule_existing": "Existing rule",
+          "rule_match": "Match type",
+          "rule_new_value": "New value",
+          "rule_value": "Match value",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Add, edit, or remove interface exclude rules.",
+        "title": "Exclude Rules"
+      },
+      "include_rules": {
+        "data": {
+          "rule_action": "Action",
+          "rule_existing": "Existing rule",
+          "rule_match": "Match type",
+          "rule_new_value": "New value",
+          "rule_value": "Match value",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "Add, edit, or remove interface include rules.",
+        "title": "Include Rules"
+      },
+      "manage_interfaces": {
+        "description": "👉 **[📘 Read Manage Interfaces Guide]({interfaces_guide_url})**\n\nManage which interfaces are created as Home Assistant entities.",
+        "menu_options": {
+          "back": "Back",
+          "builtin_vendor_filters": "Built-in Vendor Filters",
+          "submit_community_interface_rule": "Submit Community Filter/Token",
+          "entity_icon_rules": "Entity Icon Rules",
+          "excluded_interfaces": "Excluded Interfaces",
+          "included_interfaces": "Included Interfaces",
+          "interface_name_rules": "Interface Name Rules",
+          "interface_ip_display": "Interface IP Display"
+        },
+        "title": "Manage Interfaces"
+      },
+      "poe_poll_interval": {
+        "data": {
+          "poe_poll_interval": "Polling interval",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "How often to poll PoE power values (in seconds).",
+        "title": "PoE polling interval"
+      },
+      "port_name_rules": {
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nCustomize how interface names are displayed in the UI and card.\n\nBuilt-in rules are provided as examples and can be disabled per device.",
+        "menu_options": {
+          "manage_interfaces": "Back",
+          "port_rename_custom": "Custom Rename Rules",
+          "port_rename_defaults": "Built-in Rename Rules",
+          "port_rename_restore_defaults": "Restore Built-in Rules"
+        },
+        "title": "Interface Name Rules"
+      },
+      "port_rename_custom": {
+        "title": "Custom Rename Rules",
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nAdd, edit, or remove custom rename rules.\n\nRules are applied in order and take priority over built-in rename rules.\n\nTip: When editing, leave Replacement blank to keep the existing replacement (use Remove + Add to set an empty replacement).",
+        "data": {
+          "rule_action": "Action",
+          "rule_existing": "Existing rule",
+          "rule_match": "Match type",
+          "rule_value": "Match value",
+          "rule_replace": "Replacement",
+          "back_to_menu": "Go back (discard changes)"
+        }
+      },
+      "port_rename_custom_add": {
+        "data": {
+          "description": "Description (optional)",
+          "pattern": "Regex pattern",
+          "replace": "Replacement"
+        },
+        "description": "Create a regex rule that transforms the displayed interface name.\n\nExample pattern: ^Gi(\\\\d+)/0/(\\\\d+)$\nExample replace: Uplink-\\\\1-\\\\2",
+        "title": "Add Rename Rule"
+      },
+      "port_rename_custom_edit": {
+        "data": {
+          "selected": "Selected rule"
+        },
+        "description": "Select an existing rule to edit.",
+        "title": "Edit Custom Name Rule"
+      },
+      "port_rename_custom_remove": {
+        "data": {
+          "remove_index": "Rule"
+        },
+        "description": "Select a custom rule to remove.",
+        "title": "Remove Rename Rule"
+      },
+      "port_rename_defaults": {
+        "data": {
+          "builtin_link_aggregate_to_po": "Normalize link aggregate → Po",
+          "builtin_loopback_to_lo0": "Normalize loopback → Lo0",
+          "builtin_port_channel_to_po": "Normalize port-channel → Po",
+          "builtin_portchannel_to_po": "Normalize PortChannel → Po",
+          "builtin_unit_slot_port_100m_to_fa": "Normalize Unit/Slot/Port 100M → Fa",
+          "builtin_unit_slot_port_10g_to_te": "Normalize Unit/Slot/Port 10G → Te",
+          "builtin_unit_slot_port_1g_to_gi": "Normalize Unit/Slot/Port 1G → Gi",
+          "builtin_unit_slot_port_20g_to_tw": "Normalize Unit/Slot/Port 20G → Tw",
+          "defaults_action": "Action",
+          "port_rename_disabled_default_ids": "Built-in Rename Rules (disable)",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nEnable or disable built-in display name rules for this device.\n\nCurrent built-ins:\n{rules}",
+        "title": "Built-in Rename Rules"
+      },
+      "interface_ip_display": {
+        "title": "Interface IP Display",
+        "description": "👉 **[📘 Read Interface IP Display Guide]({ip_guide_url})**\n\nControl how IP addresses are shown on interfaces.",
+        "data": {
+          "hide_ip_on_physical_interfaces": "Hide IP field on Physical Interfaces",
+          "back_to_menu": "Go back (discard changes)"
+        },
+        "data_description": {
+          "hide_ip_on_physical_interfaces": "When enabled, IP addresses will only be shown on virtual or logical interfaces (such as VLAN or management interfaces)."
+        }
+      },
+      "override_power": {
+        "data": {
+          "oid": "Power OID",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "scale": "Scale"
+        },
+        "description": "👉 **[📘 Read Power Override Guide]({custom_oid_guide_url})**\n\nOverride the Power OID for this device. Leave this field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override Power"
+      },
+      "override_poe": {
+        "title": "Override PoE",
+        "description": "👉 **[📘 Read PoE Override Guide]({custom_oid_guide_url})**\n\nOverride the Power over Ethernet (PoE) OIDs for this device. Leave all fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "data": {
+          "oid_budget": "Total Budget OID",
+          "oid_used": "Used Power OID",
+          "oid_port_power": "Port Power OID",
+          "oid_port_admin": "PoE Port Admin Enable OID (optional)",
+          "oid_port_priority": "PoE Port Power Priority OID (optional)",
+          "vendor": "Vendor (Brand)",
+          "method": "Method",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "scale": "Scale"
+        }
+      },
+      "override_device_info": {
+        "title": "Override Device Info",
+        "description": "👉 **[📘 Read Device Info Override Guide]({custom_oid_guide_url})**\n\nOverride diagnostic sensor OIDs for this device. Leave all fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "data": {
+          "manufacturer_oid": "Manufacturer OID (optional)",
+          "model_oid": "Model OID (optional)",
+          "firmware_oid": "Firmware OID (optional)",
+          "hostname_oid": "Hostname OID (optional)",
+          "uptime_oid": "Uptime OID (optional)",
+          "contact_oid": "Contact OID (optional)",
+          "name_oid": "Name OID (optional)",
+          "location_oid": "Location OID (optional)",
+          "vendor": "Vendor (Brand)",
+          "back_to_menu": "Go back (discard changes)",
+          "attestation": "I attest that I have tested and verified that these OIDs work as expected.",
+          "share_with_community": "Share this with the community"
+        }
+      },
+      "submit_community_interface_rule": {
+        "title": "Choose Contribution Type",
+        "description": "Submit a new interface filter or physical/virtual classification token to the community repository to benefit all users.",
+        "data": {
+          "contrib_type": "Contribution Type"
+        }
+      },
+      "submit_community_filter": {
+        "title": "Submit Interface Filter",
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nDefine a system-level interface filter. All 3 checkboxes must be checked to authorize submission.",
+        "data": {
+          "label": "Display Label (e.g., Cisco: Skip VLANs)",
+          "vendor": "Vendor (Brand)",
+          "rule_type": "Rule Type / Action",
+          "match_type": "Match Type",
+          "match_value": "Match Value",
+          "share_with_community": "Share this with the community",
+          "attestation": "I attest that I have tested and verified that these rules/tokens work as expected.",
+          "beneficial_for_everyone": "I attest that these filters/tokens are beneficial for everyone, are generic, and do not contain personal preferences.",
+          "back_to_menu": "Go back (discard changes)"
+        }
+      },
+      "submit_community_token": {
+        "title": "Submit Classification Token",
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nDefine a physical/virtual classification token. All 3 checkboxes must be checked to authorize submission.",
+        "data": {
+          "type": "Token List",
+          "token": "Token String (e.g., irb, bdi, lag)",
+          "share_with_community": "Share this with the community",
+          "attestation": "I attest that I have tested and verified that these rules/tokens work as expected.",
+          "beneficial_for_everyone": "I attest that these filters/tokens are beneficial for everyone, are generic, and do not contain personal preferences.",
+          "back_to_menu": "Go back (discard changes)"
+        }
+      },
+      "github_connection_error": {
+        "title": "GitHub Connection Error",
+        "description": "Failed to communicate with GitHub (could not retrieve authentication device code). Please check your network/internet connection and try again."
+      },
+      "override_lldp": {
+        "data": {
+          "vendor": "Vendor (Brand)",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "oid_rem_sys_name": "LLDP Remote System Name OID",
+          "oid_cdp_sys_name": "Cisco CDP System Name OID"
+        },
+        "description": "👉 **[📘 Read LLDP Override Guide]({custom_oid_guide_url})**\n\nOverride the LLDP OIDs for this device. Leave these fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override LLDP"
+      },
+      "override_fdb": {
+        "data": {
+          "vendor": "Vendor (Brand)",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "oid_fdb_port": "FDB Port OID (Bridge-MIB)",
+          "oid_q_fdb_port": "Q-FDB Port OID (Q-BRIDGE-MIB)"
+        },
+        "description": "👉 **[📘 Read FDB Override Guide]({custom_oid_guide_url})**\n\nOverride the Forwarding Database (FDB) OIDs for this device. Leave these fields blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override FDB"
+      },
+      "override_arp": {
+        "data": {
+          "vendor": "Vendor (Brand)",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "oid_arp_mac": "ARP OID (IP-MIB)"
+        },
+        "description": "👉 **[📘 Read ARP Override Guide]({custom_oid_guide_url})**\n\nOverride the ARP OID for this device. Leave this field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override ARP"
+      },
+      "override_base_mac": {
+        "data": {
+          "vendor": "Vendor (Brand)",
+          "description": "Description",
+          "attestation": "I attest that I have tested and verified that this OID works as expected.",
+          "share_with_community": "Share this with the community",
+          "back_to_menu": "Go back (discard changes)",
+          "oid_base_mac": "Base Bridge MAC OID (Bridge-MIB)"
+        },
+        "description": "👉 **[📘 Read Base MAC Override Guide]({custom_oid_guide_url})**\n\nOverride the Base MAC OID for this device. Leave this field blank to use automatic detection or to clear any existing override.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Override Base MAC"
+      }
+    }
+  },
+  "selector": {
+    "bandwidth_data_as": {
+      "options": {
+        "attributes": "Attributes (no history)",
+        "sensors": "Sensors (history)"
+      }
+    },
+    "env_data_as": {
+      "options": {
+        "attributes": "Attributes (no history)",
+        "sensors": "Sensors (history)"
+      }
+    },
+    "poe_data_as": {
+      "options": {
+        "attributes": "Attributes (no history)",
+        "sensors": "Sensors (history)"
+      }
+    }
+  },
+  "title": "SNMP Switch Manager"
+}

@@ -9,6 +9,29 @@ tests, screenshots and README.
 | Directory | Integration | Requires Home Assistant | HACS repository |
 |---|---|---|---|
 | [`ha-rltech-fttr/`](ha-rltech-fttr/README.md) | RLTech FTTR (AC/OLT + managed FTTR APs) | 2026.9.0 | [RLTechGlobal/ha-rltech-fttr](https://github.com/RLTechGlobal/ha-rltech-fttr) |
+| [`ha-snmp-switch-manager/`](ha-snmp-switch-manager/README.md) | SNMP Switch Manager (fork, RLTech switches) | see its README | not published yet |
+
+## Forked integrations
+
+`ha-snmp-switch-manager/` is a fork of
+[OtisPresley/snmp-switch-manager](https://github.com/OtisPresley/snmp-switch-manager)
+(MIT License, Copyright (c) 2025 OtisPresley; the original `LICENSE` is kept in
+that directory and applies to it).
+
+| Item | Value |
+|---|---|
+| Upstream repository | https://github.com/OtisPresley/snmp-switch-manager |
+| Upstream branch | `main` |
+| Upstream commit forked | [`138a0d45ffeb8b0f4918404d1da743e5ce194b21`](https://github.com/OtisPresley/snmp-switch-manager/commit/138a0d45ffeb8b0f4918404d1da743e5ce194b21) (2026-10-24, version 0.6.10) |
+
+The first commit that adds the directory is an unmodified copy of that upstream
+commit, so `git diff <that commit> -- ha-snmp-switch-manager/` shows exactly what
+RLTech changed. To pick up a newer upstream release, diff the upstream commits
+since the one above and apply them to this directory.
+
+It is not in the sync workflow matrix yet: the workflow copies the root
+`LICENSE`, `LICENSE-MIT` and `NOTICE` into the published repository, which would
+replace this fork's own MIT `LICENSE`, so that step needs adjusting first.
 
 ## Why the extra repository per integration
 

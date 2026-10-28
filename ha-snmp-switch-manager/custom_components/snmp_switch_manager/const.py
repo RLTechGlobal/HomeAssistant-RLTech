@@ -1,0 +1,261 @@
+# ruff: noqa: F401
+from __future__ import annotations
+
+# Grouping imports together at the very top to satisfy E402
+from typing import Any as Any
+
+"""Constants for the SNMP Switch Manager integration."""
+
+DOMAIN = "snmp_switch_manager"
+
+# Target GitHub branch for downloading database files and creating PRs
+GITHUB_BRANCH = "main"
+
+CONF_HOST = "host"
+CONF_PORT = "port"
+CONF_COMMUNITY = "community" 
+
+DEFAULT_PORT = 161
+DEFAULT_POLL_INTERVAL = 10  # seconds
+CONF_POLL_INTERVAL = "poll_interval"
+MIN_POLL_INTERVAL = 5    # seconds
+MAX_POLL_INTERVAL = 300  # seconds
+
+PLATFORMS = ["sensor", "switch", "select"]
+
+# --- Diagnostic OIDs (built-in defaults) ---
+# Standard SNMP system OIDs
+OID_sysDescr = "1.3.6.1.2.1.1.1.0"
+OID_sysObjectID = "1.3.6.1.2.1.1.2.0"
+OID_sysUpTime = "1.3.6.1.2.1.1.3.0"
+OID_sysContact = "1.3.6.1.2.1.1.4.0"
+OID_sysName = "1.3.6.1.2.1.1.5.0"
+OID_sysLocation = "1.3.6.1.2.1.1.6.0"
+
+# ENTITY-MIB (used for some vendor firmware/model/manufacturer)
+OID_entPhysicalMfgName = "1.3.6.1.2.1.47.1.1.1.1.12"
+OID_entPhysicalModelName = "1.3.6.1.2.1.47.1.1.1.1.13"
+OID_entPhysicalSoftwareRev = "1.3.6.1.2.1.47.1.1.1.1.10"
+OID_entPhysicalSerialNum = "1.3.6.1.2.1.47.1.1.1.1.11"
+OID_entPhysicalDescr = "1.3.6.1.2.1.47.1.1.1.1.2"
+OID_entPhysicalClass = "1.3.6.1.2.1.47.1.1.1.1.5"
+OID_entPhysicalName = "1.3.6.1.2.1.47.1.1.1.1.7"
+
+# --- POWER-ETHERNET-MIB ---
+OID_pethPsePortActualPower = "1.3.6.1.2.1.105.1.1.1.15"
+OID_pethPsePortAdminEnable = "1.3.6.1.2.1.105.1.1.1.3"
+OID_pethPsePortPowerPriority = "1.3.6.1.2.1.105.1.1.1.7"
+OID_pethMainPsePower = "1.3.6.1.2.1.105.1.3.1.1.2"
+OID_pethMainPseConsumedPower = "1.3.6.1.2.1.105.1.3.1.1.4"
+# --- IF-MIB base OIDs ---
+OID_ifIndex = "1.3.6.1.2.1.2.2.1.1"
+OID_ifDescr = "1.3.6.1.2.1.2.2.1.2"
+OID_ifType = "1.3.6.1.2.1.2.2.1.3"
+OID_ifMtu = "1.3.6.1.2.1.2.2.1.4"
+OID_ifSpeed = "1.3.6.1.2.1.2.2.1.5"
+OID_ifPhysAddress = "1.3.6.1.2.1.2.2.1.6"
+OID_ifAdminStatus = "1.3.6.1.2.1.2.2.1.7"
+OID_ifOperStatus = "1.3.6.1.2.1.2.2.1.8"
+OID_ifLastChange = "1.3.6.1.2.1.2.2.1.9"
+OID_ifInOctets = "1.3.6.1.2.1.2.2.1.10"
+OID_ifInUcastPkts = "1.3.6.1.2.1.2.2.1.11"
+OID_ifInNUcastPkts = "1.3.6.1.2.1.2.2.1.12"
+OID_ifInDiscards = "1.3.6.1.2.1.2.2.1.13"
+OID_ifInErrors = "1.3.6.1.2.1.2.2.1.14"
+OID_ifInUnknownProtos = "1.3.6.1.2.1.2.2.1.15"
+OID_ifOutOctets = "1.3.6.1.2.1.2.2.1.16"
+OID_ifOutUcastPkts = "1.3.6.1.2.1.2.2.1.17"
+OID_ifOutNUcastPkts = "1.3.6.1.2.1.2.2.1.18"
+OID_ifOutDiscards = "1.3.6.1.2.1.2.2.1.19"
+OID_ifOutErrors = "1.3.6.1.2.1.2.2.1.20"
+OID_ifOutQLen = "1.3.6.1.2.1.2.2.1.21"
+OID_ifSpecific = "1.3.6.1.2.1.2.2.1.22"
+
+# IF-MIB extras
+OID_ifAlias = "1.3.6.1.2.1.31.1.1.1.18"
+OID_ifName = "1.3.6.1.2.1.31.1.1.1.1"
+OID_ifHighSpeed = "1.3.6.1.2.1.31.1.1.1.15"  # Mbps by RFC, but some devices report bps
+OID_ifHCInOctets = "1.3.6.1.2.1.31.1.1.1.6"
+OID_ifHCOutOctets = "1.3.6.1.2.1.31.1.1.1.10"
+OID_ifConnectorPresent = "1.3.6.1.2.1.31.1.1.1.17"
+
+# BRIDGE-MIB (PVID / VLAN)
+OID_dot1qPvid = "1.3.6.1.2.1.17.7.1.4.5.1.1"
+OID_dot1qVlanCurrentEgressPorts = "1.3.6.1.2.1.17.7.1.4.2.1.4"
+OID_dot1qVlanCurrentUntaggedPorts = "1.3.6.1.2.1.17.7.1.4.2.1.5"
+OID_dot1qVlanStaticEgressPorts = "1.3.6.1.2.1.17.7.1.4.3.1.2"
+OID_dot1qVlanStaticUntaggedPorts = "1.3.6.1.2.1.17.7.1.4.3.1.4"
+OID_ipAddressIfIndex = "1.3.6.1.2.1.4.34.1.3"
+OID_ospfIfIpAddress = "1.3.6.1.2.1.14.8.1.1"
+OID_routeCol = "1.3.6.1.2.1.4.24.7.1.9"
+
+# BRIDGE-MIB (bridge port -> ifIndex mapping)
+OID_dot1dBasePortIfIndex = "1.3.6.1.2.1.17.1.4.1.2"
+
+# IP-MIB / legacy (IPv4 address to ifIndex mapping)
+OID_ipAdEntAddr = "1.3.6.1.2.1.4.20.1.1"
+OID_ipAdEntIfIndex = "1.3.6.1.2.1.4.20.1.2"
+OID_ipAdEntNetMask = "1.3.6.1.2.1.4.20.1.3"
+
+# --- HOST-RESOURCES-MIB ---
+OID_hrProcessorLoad = "1.3.6.1.2.1.25.3.3.1.2"
+OID_hrStorageType = "1.3.6.1.2.1.25.2.3.1.2"
+OID_hrStorageAllocationUnits = "1.3.6.1.2.1.25.2.3.1.4"
+OID_hrStorageSize = "1.3.6.1.2.1.25.2.3.1.5"
+OID_hrStorageUsed = "1.3.6.1.2.1.25.2.3.1.6"
+OID_hrStorageRam = "1.3.6.1.2.1.25.2.1.2"
+
+
+
+# ---------------------------
+# Options / device overrides
+# ---------------------------
+
+# Per-device custom diagnostic OIDs
+CONF_CUSTOM_OIDS = "custom_oids"
+CONF_ENABLE_CUSTOM_OIDS = "enable_custom_oids"
+CONF_RESET_CUSTOM_OIDS = "reset_custom_oids"
+CONF_FEATURE_OVERRIDES = "feature_overrides"
+
+# Device options (overrides)
+CONF_UPTIME_POLL_INTERVAL = "uptime_poll_interval"
+DEFAULT_UPTIME_POLL_INTERVAL = 300  # seconds
+MIN_UPTIME_POLL_INTERVAL = 30  # seconds
+MAX_UPTIME_POLL_INTERVAL = 3600  # seconds
+
+CONF_BANDWIDTH_POLL_INTERVAL = "bandwidth_poll_interval"
+DEFAULT_BANDWIDTH_POLL_INTERVAL = 30  # seconds
+MIN_BANDWIDTH_POLL_INTERVAL = 5  # seconds
+MAX_BANDWIDTH_POLL_INTERVAL = 3600  # seconds
+
+# Optional per-feature polling intervals (seconds)
+CONF_POE_POLL_INTERVAL = "poe_poll_interval"
+DEFAULT_POE_POLL_INTERVAL = 30
+MIN_POE_POLL_INTERVAL = 5
+MAX_POE_POLL_INTERVAL = 3600
+
+CONF_ENV_POLL_INTERVAL = "env_poll_interval"
+DEFAULT_ENV_POLL_INTERVAL = 30
+MIN_ENV_POLL_INTERVAL = 5
+MAX_ENV_POLL_INTERVAL = 3600
+
+CONF_OVERRIDE_COMMUNITY = "override_community"
+CONF_OVERRIDE_PORT = "override_port" 
+
+# ---------------------------
+# SNMP Version / SNMPv3
+# ---------------------------
+
+CONF_SNMP_VERSION = "snmp_version"
+SNMP_VERSION_V2C = "v2c"
+SNMP_VERSION_V3 = "v3"
+
+CONF_SNMPV3_USERNAME = "snmpv3_username"
+CONF_SNMPV3_AUTH_PROTOCOL = "snmpv3_auth_protocol"
+CONF_SNMPV3_AUTH_PASSWORD = "snmpv3_auth_password"
+CONF_SNMPV3_PRIV_PROTOCOL = "snmpv3_priv_protocol"
+CONF_SNMPV3_PRIV_PASSWORD = "snmpv3_priv_password"
+
+SNMPV3_AUTH_NONE = "none"
+SNMPV3_AUTH_SHA = "sha"
+SNMPV3_AUTH_MD5 = "md5"
+
+SNMPV3_PRIV_NONE = "none"
+SNMPV3_PRIV_DES = "des"
+SNMPV3_PRIV_AES = "aes"  # reserved for future expansion
+
+# Stored bridge identifier used to keep Home Assistant Device Registry stable
+# when switching an existing device between SNMPv2c and SNMPv3.
+#
+# Historically, devices were identified using a string derived from
+# host/port/community for v2c. With v3, community may not exist; by persisting
+# the legacy identifier when available, HA will not recreate a device when the
+# SNMP version changes.
+CONF_LEGACY_DEVICE_ID = "legacy_device_id"
+
+# Include/exclude rules (simple modes)
+CONF_INCLUDE_STARTS_WITH = "include_starts_with"
+CONF_INCLUDE_CONTAINS = "include_contains"
+CONF_INCLUDE_ENDS_WITH = "include_ends_with"
+
+CONF_EXCLUDE_STARTS_WITH = "exclude_starts_with"
+CONF_EXCLUDE_CONTAINS = "exclude_contains"
+CONF_EXCLUDE_ENDS_WITH = "exclude_ends_with"
+
+CONF_ICON_RULES = "icon_rules"
+
+# Interface IP display
+# Primary option key (v0.4.1-beta.2)
+CONF_HIDE_IP_ON_PHYSICAL_INTERFACES = "hide_ip_on_physical_interfaces"
+
+# Compatibility alias (used by some dev builds)
+CONF_HIDE_IP_ON_PHYSICAL = "hide_ip_on_physical"
+
+# Bandwidth sensor options (per-device)
+CONF_BW_ENABLE = "enable_bandwidth_sensors"
+CONF_BW_INCLUDE_STARTS_WITH = "bw_include_starts_with"
+CONF_BW_INCLUDE_CONTAINS = "bw_include_contains"
+CONF_BW_INCLUDE_ENDS_WITH = "bw_include_ends_with"
+CONF_BW_EXCLUDE_STARTS_WITH = "bw_exclude_starts_with"
+CONF_BW_EXCLUDE_CONTAINS = "bw_exclude_contains"
+CONF_BW_EXCLUDE_ENDS_WITH = "bw_exclude_ends_with"
+
+
+# Backwards/forwards compatibility aliases (config_flow expects these names)
+CONF_BW_ENABLED = CONF_BW_ENABLE
+CONF_BW_INCLUDE_RULES = "bw_include_rules"
+CONF_BW_EXCLUDE_RULES = "bw_exclude_rules"
+
+
+# Built-in vendor interface filtering rule toggles (per-device)
+CONF_DISABLED_VENDOR_FILTER_RULE_IDS = "disabled_vendor_filter_rule_ids"
+
+# Built-in vendor interface filtering rules (deprecated in code, now in interface_filters.json)
+BUILTIN_VENDOR_FILTER_RULES: list[dict[str, str]] = []
+
+# Port rename rules (regex)
+CONF_PORT_RENAME_USER_RULES = "port_rename_user_rules"
+CONF_PORT_RENAME_DISABLED_DEFAULT_IDS = "port_rename_disabled_default_ids"
+
+# Built-in port rename rules (deprecated in code, now in rename_rules.json)
+DEFAULT_PORT_RENAME_RULES: list[dict[str, str]] = []
+
+# -----------------------------
+# v0.4.0+ (planned): history vs attributes mode selectors
+# -----------------------------
+# Bandwidth collection mode:
+# - sensors: create separate sensor entities (history)
+# - attributes: add values to port entities as attributes (no history)
+CONF_BW_MODE = "bw_mode"
+BW_MODE_SENSORS = "sensors"
+BW_MODE_ATTRIBUTES = "attributes"
+
+# Environmental sensors enable/mode
+CONF_ENV_ENABLE = "env_enabled"
+CONF_ENV_MODE = "env_mode"
+ENV_MODE_SENSORS = "sensors"
+ENV_MODE_ATTRIBUTES = "attributes"
+
+# PoE per-port statistics enable/mode
+CONF_POE_ENABLE = "poe_enabled"
+CONF_POE_MODE = "poe_mode"
+CONF_POE_PER_PORT_POWER = "poe_per_port_power"  # create per-port PoE Power (W) sensors in sensors mode
+POE_MODE_SENSORS = "sensors"
+POE_MODE_ATTRIBUTES = "attributes"
+CONF_POE_CONTROL_LOOPS = "poe_control_loops"
+
+# Bandwidth sensor icon overrides (optional, per type)
+CONF_BW_RX_THROUGHPUT_ICON = "bw_rx_throughput_icon"
+CONF_BW_TX_THROUGHPUT_ICON = "bw_tx_throughput_icon"
+CONF_BW_RX_TOTAL_ICON = "bw_rx_total_icon"
+CONF_BW_TX_TOTAL_ICON = "bw_tx_total_icon"
+
+# The __all__ list should be at the bottom. 
+# List every constant name here as a string.
+__all__ = [
+    "Any",
+    "DOMAIN",
+    "GITHUB_BRANCH",
+    "PLATFORMS",
+    # Add your specific OID variable names here as well
+]

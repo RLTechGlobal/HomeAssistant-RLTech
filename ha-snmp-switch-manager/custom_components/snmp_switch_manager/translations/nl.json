@@ -1,0 +1,664 @@
+{
+  "config": {
+    "error": {
+      "cannot_connect": "Kan geen verbinding maken of SNMP-time-out",
+      "required": "Vereist",
+      "invalid_password_length": "Wachtwoord moet 8–31 tekens zijn"
+    },
+    "step": {
+      "bandwidth_enable_disable": {
+        "data": {
+          "bw_mode": "Bandbreedtegegevens als",
+          "enable_bandwidth_sensors": "Bandbreedtesensoren inschakelen"
+        },
+        "description": "Schakel bandbreedtemeting in voor dit apparaat.\n\nAls je Attributen kiest, worden bandbreedtewaarden toegevoegd aan poortentiteiten (geen geschiedenis).\nAls je Sensoren kiest, worden aparte bandbreedtesensoren gemaakt (geschiedenis).",
+        "title": "Bandbreedtesensoren"
+      },
+      "bandwidth_poll_interval": {
+        "data": {
+          "bandwidth_poll_interval": "Poll-interval (seconden)"
+        },
+        "description": "Stel het poll-interval in dat wordt gebruikt om bandbreedte/verkeer te berekenen.",
+        "title": "Bandbreedtesensoren"
+      },
+      "bandwidth_sensors": {
+        "description": "Schakel optionele RX/TX-doorvoersensoren en totaalverkeerssensoren in voor geselecteerde interfaces.",
+        "menu_options": {
+          "back": "Terug",
+          "bandwidth_enable_disable": "Inschakelen / Uitschakelen",
+          "bandwidth_exclude_rules": "Uitsluitregels",
+          "bandwidth_include_rules": "Insluitregels",
+          "bandwidth_poll_interval": "Poll-interval"
+        },
+        "title": "Bandbreedtesensoren"
+      },
+      "environmental_enable_disable": {
+        "data": {
+          "env_enabled": "Omgevingssensoren inschakelen",
+          "env_mode": "Omgevingsgegevens als",
+          "poe_enabled": "PoE-sensoren inschakelen",
+          "poe_mode": "PoE-gegevens als",
+          "poe_per_port_power": "PoE-vermogen sensoren per poort maken",
+          "poe_control_loops": "PoE-besturingslussen"
+        },
+        "description": "Schakel omgevings-/PoE-monitoring in voor dit apparaat.\n\nAls je Attributen kiest, worden waarden toegevoegd aan poortentiteiten (geen geschiedenis).\nAls je Sensoren kiest, worden aparte sensorentiteiten gemaakt (geschiedenis).",
+        "title": "Omgevingssensoren"
+      },
+      "environmental_sensors": {
+        "description": "Schakel optionele omgevings- en PoE-monitoring in voor dit apparaat.",
+        "menu_options": {
+          "back": "Terug",
+          "environmental_enable_disable": "Inschakelen / Uitschakelen"
+        },
+        "title": "Omgevingssensoren"
+      },
+      "init": {
+        "description": "Beheer apparaat-specifieke overschrijvingen en geavanceerde instellingen.",
+        "menu_options": {
+          "bandwidth_sensors": "Bandbreedtesensoren",
+          "connection_overrides": "Verbinding en naam-overschrijvingen",
+          "environmental_sensors": "Omgevingssensoren",
+          "manage_interfaces": "Interfaces beheren"
+        },
+        "title": "Apparaatopties"
+      },
+      "manage_interfaces": {
+        "menu_options": {
+          "back": "Terug",
+          "builtin_filters": "Ingebouwde leveranciersfilters",
+          "interface_exclude_rules": "Uitgesloten interfaces",
+          "interface_include_rules": "Ingesloten interfaces",
+          "port_name_rules": "Interfacenaamregels"
+        },
+        "title": "Interfaces beheren"
+      },
+      "user": {
+        "data": {
+          "host": "Host/IP",
+          "port": "Poort",
+          "snmp_version": "SNMP-versie"
+        },
+        "description": "Kies de SNMP-versie en geef verbindingsgegevens op.",
+        "title": "Verbind met je switch"
+      },
+      "snmpv2c": {
+        "data": {
+          "community": "SNMP-community (RW voor alias-schrijven)"
+        },
+        "description": "Geef de SNMP v2c-community op.\n\nAls je een authenticatiefout ziet, controleer dan de community-string op het apparaat.",
+        "title": "SNMP v2c"
+      },
+      "snmpv3": {
+        "data": {
+          "snmpv3_username": "SNMPv3 gebruikersnaam",
+          "snmpv3_auth_protocol": "Authenticatieprotocol",
+          "snmpv3_auth_password": "Authenticatiewachtwoord",
+          "snmpv3_priv_protocol": "Privacyprotocol",
+          "snmpv3_priv_password": "Privacywachtwoord"
+        },
+        "description": "Geef SNMP v3-inloggegevens op.\n\n- **Authenticatieprotocol:** HMAC-SHA of HMAC-MD5\n- **Privacyprotocol:** Geen of CBC-DES (apparaat-afhankelijk)\n\nVeel apparaten vereisen wachtwoorden tussen 8 en 31 tekens en kunnen speciale tekens weigeren.",
+        "title": "SNMP v3"
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "invalid_oid": "Ongeldig OID-formaat (moet een numerieke punt-OID zijn)",
+      "invalid_poll_interval": "Ongeldig poll-interval",
+      "invalid_port": "Ongeldige poort",
+      "invalid_regex": "Ongeldig regex-patroon",
+      "invalid_uptime_interval": "Ongeldig uptime-verversinterval",
+      "required": "Vereist",
+      "invalid_password_length": "Wachtwoord moet 8–31 tekens zijn",
+      "required_attestation": "Je moet verklaren dat je de OID hebt getest",
+      "authorization_pending": "Autorisatie in behandeling. Voer de code in op GitHub en probeer het opnieuw.",
+      "github_error": "Communicatie met GitHub mislukt. Probeer het later opnieuw.",
+      "required_share": "Aangezien u de OID hebt geverifieerd, selecteert u ook de optie om deze met de community te delen om anderen te helpen.",
+      "required_attestation_to_share": "U moet verklaren dat u de OID hebt getest voordat u deze met de community deelt.",
+      "duplicate_oid": "Deze OID bestaat al in de database voor deze leverancier.",
+      "invalid_float": "Ongeldige numerieke schaalfactor (moet een float zijn zoals 1.0 of 0.1)",
+      "required_all_attestations_to_share": "U moet alle drie de attestation-vakjes aanvinken om naar GitHub te verzenden.",
+      "either_percentage_or_free_total": "Geef ofwel de OID voor het geheugengebruikpercentage op OF beide OID's voor vrij en totaal geheugen, niet beide."
+    },
+    "step": {
+      "bandwidth_enable": {
+        "data": {
+          "enable_bandwidth_sensors": "Bandbreedtesensoren inschakelen"
+        },
+        "description": "Schakel bandbreedtesensor-entiteiten voor dit apparaat in of uit.",
+        "title": "Bandbreedtesensoren"
+      },
+      "bandwidth_enable_disable": {
+        "data": {
+          "bw_mode": "Bandbreedtegegevens als",
+          "enable_bandwidth_sensors": "Bandbreedtemeting inschakelen",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nSchakel bandbreedtemeting in voor dit apparaat.\n\nAls je **Attributen** kiest, worden bandbreedtewaarden toegevoegd aan poortentiteiten (geen geschiedenis).\nAls je **Sensoren** kiest, worden aparte bandbreedtesensoren gemaakt (geschiedenis).",
+        "title": "Bandbreedtesensoren"
+      },
+      "bandwidth_exclude_rules": {
+        "data": {
+          "rule_action": "Actie",
+          "rule_existing": "Bestaande regel",
+          "rule_match": "Match",
+          "rule_new_value": "Nieuwe waarde",
+          "rule_value": "Waarde",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nVoeg uitsluitregels toe of verwijder ze. Uitsluitregels hebben altijd voorrang.",
+        "title": "Uitsluitregels voor bandbreedtesensoren"
+      },
+      "bandwidth_icons": {
+        "data": {
+          "bw_rx_throughput_icon": "RX-doorvoer pictogram",
+          "bw_rx_total_icon": "RX-totaal pictogram",
+          "bw_tx_throughput_icon": "TX-doorvoer pictogram",
+          "bw_tx_total_icon": "TX-totaal pictogram",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Optionele pictogram-overschrijvingen voor bandbreedtesensoren. Laat leeg om de standaardwaarden te gebruiken.",
+        "title": "Pictogrammen voor bandbreedtesensoren"
+      },
+      "bandwidth_include_rules": {
+        "data": {
+          "rule_action": "Actie",
+          "rule_existing": "Bestaande regel",
+          "rule_match": "Match",
+          "rule_new_value": "Nieuwe waarde",
+          "rule_value": "Waarde",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nVoeg insluitregels toe of verwijder ze. Als er insluitregels zijn ingesteld, krijgen alleen overeenkomende interfaces bandbreedtesensoren.",
+        "title": "Insluitregels voor bandbreedtesensoren"
+      },
+      "bandwidth_poll_interval": {
+        "data": {
+          "bandwidth_poll_interval": "Poll-interval (seconden)",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Stel het poll-interval voor bandbreedtesensoren in. Lagere intervallen werken vaker bij, maar verhogen de SNMP-belasting.",
+        "title": "Bandbreedtesensoren"
+      },
+      "bandwidth_sensors": {
+        "description": "👉 **[📘 Read Bandwidth Configuration Guide]({bandwidth_guide_url})**\n\nSchakel optionele RX/TX-doorvoersensoren en totaalverkeerssensoren in voor geselecteerde interfaces.",
+        "menu_options": {
+          "back": "Terug",
+          "bandwidth_enable_disable": "Inschakelen / Uitschakelen",
+          "bandwidth_exclude_rules": "Uitsluitregels",
+          "bandwidth_icons": "Pictogrammen voor bandbreedtesensoren",
+          "bandwidth_include_rules": "Insluitregels",
+          "bandwidth_poll_interval": "Poll-interval"
+        },
+        "title": "Bandbreedtesensoren"
+      },
+      "builtin_filters": {
+        "data": {
+          "disabled_vendor_filter_rule_ids": "Uitgeschakelde ingebouwde filterregels",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Schakel ingebouwde leveranciers-interfacefilterregels voor dit apparaat in of uit.\n\nUitgeschakelde regels worden niet toegepast tijdens interface-detectie.",
+        "title": "Ingebouwde leveranciersfilters"
+      },
+      "connection_and_naming_overrides": {
+        "data": {
+          "snmp_version": "SNMP-versie",
+          "override_community": "SNMP v2c — Community-overschrijving (optioneel)",
+          "override_port": "SNMP v2c — Poort-overschrijving (optioneel)",
+          "uptime_poll_interval": "Uptime-verversinterval (seconden)",
+          "snmpv3_username": "SNMP v3 — Gebruikersnaam (optioneel)",
+          "snmpv3_auth_protocol": "SNMP v3 — Authenticatieprotocol (optioneel)",
+          "snmpv3_auth_password": "SNMP v3 — Authenticatiewachtwoord (optioneel)",
+          "snmpv3_priv_protocol": "SNMP v3 — Privacyprotocol (optioneel)",
+          "snmpv3_priv_password": "SNMP v3 — Privacywachtwoord (optioneel)",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read Connection & Name Guide]({connection_guide_url})**\n\nOptionele overschrijvingen per apparaat. Laat leeg om waarden uit de initiële setup te gebruiken.\n\n### SNMP-versie\nAlle velden zijn altijd zichtbaar door beperkingen van Home Assistant. Alleen de geselecteerde **SNMP-versie** bepaalt welke velden worden gebruikt.\n\n### SNMP v2c\nGebruik **SNMP community-overschrijving** en **SNMP poort-overschrijving** alleen als je waarden uit de initiële setup moet overschrijven.\n\n### SNMP v3\nVul **SNMPv3 gebruikersnaam** en authenticatie-/privacy-instellingen in wanneer SNMP v3 is geselecteerd. Veel apparaten vereisen wachtwoorden tussen 8 en 31 tekens en kunnen speciale tekens weigeren.",
+        "title": "Verbinding en naam"
+      },
+      "feature_overrides": {
+        "description": "👉 **[📘 Read Custom OID Overrides Guide]({custom_oid_guide_url})**\n\nBeheer aangepaste OID-overschrijvingen voor specifieke functies.",
+        "menu_options": {
+          "override_power": "Power overschrijven",
+          "back": "Terug",
+          "override_cpu": "CPU overschrijven",
+          "override_memory": "Geheugen overschrijven",
+          "override_fans": "Ventilatoren overschrijven",
+          "override_psu": "Voeding overschrijven",
+          "override_temperature": "Temperatuur overschrijven",
+          "override_poe": "PoE overschrijven",
+          "override_device_info": "Apparaatinfo overschrijven",
+          "override_lldp": "LLDP overschrijven",
+          "override_fdb": "FDB overschrijven",
+          "override_arp": "ARP overschrijven",
+          "override_base_mac": "Basis-MAC overschrijven"
+        },
+        "title": "Functie OID-overschrijvingen"
+      },
+      "override_cpu": {
+        "data": {
+          "oid": "CPU OID",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "scale": "Schaal",
+          "unit": "Eenheid",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID werkt zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read CPU Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de CPU OID voor dit apparaat. Laat dit veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "CPU overschrijven"
+      },
+      "override_memory": {
+        "data": {
+          "oid": "Geheugengebruik percentage OID",
+          "oid_free": "Vrij geheugen OID",
+          "oid_total": "Totaal geheugen OID",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID's werken zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "scale": "Schaal"
+        },
+        "description": "👉 **[📘 Read Memory Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de Geheugen OID's voor dit apparaat. Voer een enkele OID voor het geheugengebruikpercentage in OF beide OID's voor vrij en totaal geheugen. Laat alle velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Geheugen overschrijven"
+      },
+      "override_fans": {
+        "data": {
+          "oid_rpm": "Ventilator RPM OID (optioneel)",
+          "oid_status": "Ventilator status OID (optioneel)",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID's werken zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "scale": "Schaal"
+        },
+        "description": "👉 **[📘 Read Fans Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de Ventilator OID’s voor dit apparaat. Laat beide velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Ventilatoren overschrijven"
+      },
+      "override_psu": {
+        "data": {
+          "oid_status": "Voeding status OID",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "oid_label": "Label OID (optioneel)",
+          "filter": "Filter (optioneel)",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID's werken zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read PSU Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de PSU OID’s voor dit apparaat. Laat dit veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Voeding overschrijven"
+      },
+      "override_temperature": {
+        "data": {
+          "oid": "Temperatuur OID",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "oid_state": "Status OID (optioneel)",
+          "oid_label": "Label OID (optioneel)",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID's werken zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "scale": "Schaal"
+        },
+        "description": "👉 **[📘 Read Temperature Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de Temperatuur OID’s voor dit apparaat. Laat het hoofd-temperatuur OID veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Temperatuur overschrijven"
+      },
+      "ask_pr": {
+        "data": {
+          "submit": "Overschrijving indienen bij GitHub"
+        },
+        "description": "Wil je deze overschrijving indienen bij de repository om andere gebruikers te helpen?",
+        "title": "Indienen bij GitHub?"
+      },
+      "submit_pr": {
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nOm je overschrijving in te dienen, authenticeer je bij GitHub:\n\n1. Ga naar [github.com/login/device]({url}) (opent in een nieuw tabblad)\n2. Kopieer en voer de code in: `{code}`\n3. Zodra je het groene vinkje op GitHub krijgt, klik je op Verzenden.",
+        "title": "Authenticeren bij GitHub",
+        "data": {
+          "authorized": "Ik heb dit geautoriseerd op GitHub",
+          "back_to_menu": "Teruggaan (wijzigingen negeren)"
+        }
+      },
+      "create_pr": {
+        "description": "{status}",
+        "title": "PR-status"
+      },
+      "device_options": {
+        "description": "Beheer apparaat-specifieke overschrijvingen en geavanceerde instellingen.",
+        "menu_options": {
+          "bandwidth_sensors": "Bandbreedtesensoren",
+          "connection_and_naming_overrides": "Verbinding en naam",
+          "environmental_sensors": "Omgevingssensoren",
+          "feature_overrides": "Functie OID-overschrijvingen",
+          "manage_interfaces": "Interfaces beheren"
+        },
+        "title": "Apparaatopties"
+      },
+      "entity_icon_rules": {
+        "data": {
+          "icon_action": "Actie",
+          "icon_existing": "Bestaande regel",
+          "icon_icon": "Pictogram (bijv. mdi:ethernet)",
+          "icon_match": "Matchtype",
+          "icon_value": "Matchwaarde",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Interface-entiteitspictogrammen overschrijven op basis van interfacenaam-matching.",
+        "title": "Entiteitspictogramregels"
+      },
+      "environmental_enable_disable": {
+        "data": {
+          "env_enabled": "Omgevingssensoren inschakelen",
+          "env_mode": "Omgevingsgegevens als",
+          "poe_enabled": "PoE-statistieken inschakelen",
+          "poe_mode": "PoE-gegevens als",
+          "poe_per_port_power": "PoE-vermogen sensoren per poort maken",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "poe_control_loops": "PoE-besturingslussen"
+        },
+        "description": "👉 **[📘 Read Environmental Sensors Guide]({env_guide_url})**\n\nKies of omgevings-/PoE-gegevens worden opgeslagen als attributen (geen geschiedenis) of als aparte sensoren (geschiedenis).",
+        "title": "Omgevingssensoren"
+      },
+      "environmental_poll_interval": {
+        "data": {
+          "env_poll_interval": "Poll-interval",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Hoe vaak omgevingswaarden pollen (in seconden).",
+        "title": "Poll-interval voor omgevingswaarden"
+      },
+      "environmental_sensors": {
+        "description": "👉 **[📘 Read Environmental Sensors Guide]({env_guide_url})**\n\nSchakel optionele omgevings- en PoE-monitoring in voor dit apparaat.",
+        "menu_options": {
+          "back": "Terug",
+          "environmental_enable_disable": "Inschakelen / Uitschakelen",
+          "environmental_poll_interval": "Poll-interval voor omgevingswaarden",
+          "poe_poll_interval": "PoE poll-interval"
+        },
+        "title": "Omgevingssensoren"
+      },
+      "exclude_rules": {
+        "data": {
+          "rule_action": "Actie",
+          "rule_existing": "Bestaande regel",
+          "rule_match": "Matchtype",
+          "rule_new_value": "Nieuwe waarde",
+          "rule_value": "Matchwaarde",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Voeg interface-uitsluitregels toe, bewerk of verwijder ze.",
+        "title": "Uitsluitregels"
+      },
+      "include_rules": {
+        "data": {
+          "rule_action": "Actie",
+          "rule_existing": "Bestaande regel",
+          "rule_match": "Matchtype",
+          "rule_new_value": "Nieuwe waarde",
+          "rule_value": "Matchwaarde",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Voeg interface-insluitregels toe, bewerk of verwijder ze.",
+        "title": "Insluitregels"
+      },
+      "manage_interfaces": {
+        "description": "👉 **[📘 Read Manage Interfaces Guide]({interfaces_guide_url})**\n\nBeheer welke interfaces als Home Assistant-entiteiten worden aangemaakt.",
+        "menu_options": {
+          "back": "Terug",
+          "builtin_vendor_filters": "Ingebouwde leveranciersfilters",
+          "entity_icon_rules": "Entiteitspictogramregels",
+          "excluded_interfaces": "Uitgesloten interfaces",
+          "included_interfaces": "Ingesloten interfaces",
+          "interface_name_rules": "Interfacenaamregels",
+          "interface_ip_display": "Interface IP-weergave",
+          "submit_community_interface_rule": "Community-filter/token indienen"
+        },
+        "title": "Interfaces beheren"
+      },
+      "poe_poll_interval": {
+        "data": {
+          "poe_poll_interval": "Poll-interval",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "Hoe vaak PoE-vermogenwaarden pollen (in seconden).",
+        "title": "PoE poll-interval"
+      },
+      "port_name_rules": {
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nPas aan hoe interfacenamen in de UI en kaart worden weergegeven.\n\nIngebouwde regels worden als voorbeelden geleverd en kunnen per apparaat worden uitgeschakeld.",
+        "menu_options": {
+          "manage_interfaces": "Terug",
+          "port_rename_custom": "Aangepaste hernoemregels",
+          "port_rename_defaults": "Ingebouwde hernoemregels",
+          "port_rename_restore_defaults": "Ingebouwde regels herstellen"
+        },
+        "title": "Interfacenaamregels"
+      },
+      "port_rename_custom": {
+        "title": "Aangepaste hernoemregels",
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nVoeg aangepaste hernoemregels toe, bewerk of verwijder ze.\n\nRegels worden in volgorde toegepast en hebben prioriteit boven ingebouwde hernoemregels.\n\nTip: laat bij bewerken “Vervanging” leeg om de bestaande vervanging te behouden (gebruik Verwijderen + Toevoegen om een lege vervanging in te stellen).",
+        "data": {
+          "rule_action": "Actie",
+          "rule_existing": "Bestaande regel",
+          "rule_match": "Matchtype",
+          "rule_value": "Matchwaarde",
+          "rule_replace": "Vervanging",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        }
+      },
+      "port_rename_custom_add": {
+        "data": {
+          "description": "Beschrijving (optioneel)",
+          "pattern": "Regex-patroon",
+          "replace": "Vervanging"
+        },
+        "description": "Maak een regex-regel die de weergegeven interfacenaam omzet.\n\nVoorbeeldpatroon: ^Gi(\\\\d+)/0/(\\\\d+)$\nVoorbeeldvervanging: Uplink-\\\\1-\\\\2",
+        "title": "Hernoemregel toevoegen"
+      },
+      "port_rename_custom_edit": {
+        "data": {
+          "selected": "Geselecteerde regel"
+        },
+        "description": "Selecteer een bestaande regel om te bewerken.",
+        "title": "Aangepaste naamregel bewerken"
+      },
+      "port_rename_custom_remove": {
+        "data": {
+          "remove_index": "Regel"
+        },
+        "description": "Selecteer een aangepaste regel om te verwijderen.",
+        "title": "Hernoemregel verwijderen"
+      },
+      "port_rename_defaults": {
+        "data": {
+          "builtin_link_aggregate_to_po": "Link-aggregaat normaliseren → Po",
+          "builtin_loopback_to_lo0": "Loopback normaliseren → Lo0",
+          "builtin_port_channel_to_po": "Port-channel normaliseren → Po",
+          "builtin_portchannel_to_po": "PortChannel normaliseren → Po",
+          "builtin_unit_slot_port_100m_to_fa": "Unit/Slot/Port 100M normaliseren → Fa",
+          "builtin_unit_slot_port_10g_to_te": "Unit/Slot/Port 10G normaliseren → Te",
+          "builtin_unit_slot_port_1g_to_gi": "Unit/Slot/Port 1G normaliseren → Gi",
+          "builtin_unit_slot_port_20g_to_tw": "Unit/Slot/Port 20G normaliseren → Tw",
+          "defaults_action": "Actie",
+          "port_rename_disabled_default_ids": "Ingebouwde hernoemregels (uitschakelen)",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "description": "👉 **[📘 Read Interface Naming Rules Guide]({naming_guide_url})**\n\nSchakel ingebouwde weergavenaamregels voor dit apparaat in of uit.\n\nHuidige ingebouwde regels:\n{rules}",
+        "title": "Ingebouwde hernoemregels"
+      },
+      "interface_ip_display": {
+        "title": "Interface IP-weergave",
+        "description": "👉 **[📘 Read Interface IP Display Guide]({ip_guide_url})**\n\nBepaal hoe IP-adressen op interfaces worden weergegeven.",
+        "data": {
+          "hide_ip_on_physical_interfaces": "IP-veld op fysieke interfaces verbergen",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)"
+        },
+        "data_description": {
+          "hide_ip_on_physical_interfaces": "Wanneer ingeschakeld, worden IP-adressen alleen weergegeven op virtuele of logische interfaces (zoals VLAN- of beheerinterfaces)."
+        }
+      },
+      "override_power": {
+        "data": {
+          "oid": "Power OID",
+          "vendor": "Leverancier (Merk)",
+          "method": "Methode",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik deze OID hebt getest en geverifieerd dat deze naar behoren werkt.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "scale": "Schaal"
+        },
+        "description": "👉 **[📘 Read Power Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de Power OID voor dit apparaat. Laat dit veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "title": "Power overschrijven"
+      },
+      "override_poe": {
+        "title": "PoE overschrijven",
+        "description": "👉 **[📘 Read PoE Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de Power over Ethernet (PoE) OID’s voor dit apparaat. Laat alle velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "data": {
+          "oid_budget": "Totaal budget OID",
+          "oid_used": "Gebruikt vermogen OID",
+          "oid_port_power": "Port vermogen OID",
+          "vendor": "Fabrikant (Merk)",
+          "method": "Methode",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik deze OID's heb getest en geverifieerd en dat ze naar verwachting werken.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "scale": "Schaal",
+          "oid_port_admin": "PoE-poortbeheer inschakelen OID (optioneel)",
+          "oid_port_priority": "PoE-poortstroomprioriteit OID (optioneel)"
+        }
+      },
+      "override_device_info": {
+        "title": "Apparaatinfo overschrijven",
+        "description": "👉 **[📘 Read Device Info Override Guide]({custom_oid_guide_url})**\n\nOverschrijf de diagnostische sensor-OID’s voor dit apparaat. Laat alle velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Existing Database Entries:\n{existing_entries}",
+        "data": {
+          "manufacturer_oid": "Fabrikant-OID (optioneel)",
+          "model_oid": "Model-OID (optioneel)",
+          "firmware_oid": "Firmware-OID (optioneel)",
+          "hostname_oid": "Hostname-OID (optioneel)",
+          "uptime_oid": "Uptime-OID (optioneel)",
+          "vendor": "Fabrikant (Merk)",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "attestation": "Ik verklaar dat ik deze OID’s heb getest en geverifieerd.",
+          "share_with_community": "Deel dit met de community",
+          "contact_oid": "Contact OID (optioneel)",
+          "name_oid": "Naam OID (optioneel)",
+          "location_oid": "Locatie OID (optioneel)"
+        }
+      },
+      "github_connection_error": {
+        "title": "GitHub-verbindingsfout",
+        "description": "Fout bij de communicatie met GitHub. Controleer uw internetverbinding en probeer het opnieuw."
+      },
+      "submit_community_interface_rule": {
+        "title": "Kies bijdragetype",
+        "description": "Dien een nieuw interfacefilter of fysiek/virtueel classificatietoken in bij de community-repository ten behoeve van alle gebruikers.",
+        "data": {
+          "contrib_type": "Bijdragetype"
+        }
+      },
+      "submit_community_filter": {
+        "title": "Interfacefilter indienen",
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nDefinieer een interfacefilter op systeemniveau. Alle 3 de vakjes moeten worden aangevinkt om verzending toe te staan.",
+        "data": {
+          "label": "Weergavelabel (bijv. Cisco: VLAN's overslaan)",
+          "vendor": "Leverancier (Merk)",
+          "rule_type": "Regeltype / Actie",
+          "match_type": "Vergelijkingstype",
+          "match_value": "Vergelijkingswaarde",
+          "share_with_community": "Delen met de community",
+          "attestation": "Ik verklaar dat ik deze regels/tokens heb getest en geverifieerd dat ze naar behoren werken.",
+          "beneficial_for_everyone": "Ik verklaar dat deze filters/tokens nuttig zijn voor iedereen, generiek zijn en geen persoonlijke voorkeuren bevatten.",
+          "back_to_menu": "Teruggaan (wijzigingen negeren)"
+        }
+      },
+      "submit_community_token": {
+        "title": "Classificatietoken indienen",
+        "description": "👉 **[📘 Read Community Submissions Guide]({community_guide_url})**\n\nDefinieer een fysiek/virtueel classificatietoken. Alle 3 de vakjes moeten worden aangevinkt om verzending toe te staan.",
+        "data": {
+          "type": "Tokenlijst",
+          "token": "Tokenreeks (bijv. irb, bdi, lag)",
+          "share_with_community": "Delen met de community",
+          "attestation": "Ik verklaar dat ik deze regels/tokens heb getest en geverifieerd dat ze naar behoren werken.",
+          "beneficial_for_everyone": "Ik verklaar dat deze filters/tokens nuttig zijn voor iedereen, generiek zijn en geen persoonlijke voorkeuren bevatten.",
+          "back_to_menu": "Teruggaan (wijzigingen negeren)"
+        }
+      },
+      "override_lldp": {
+        "data": {
+          "vendor": "Leverancier (Merk)",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID werkt zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "oid_rem_sys_name": "LLDP Externe Systeemnaam OID",
+          "oid_cdp_sys_name": "Cisco CDP Systeemnaam OID"
+        },
+        "description": "👉 **[📘 Lees LLDP Overschrijvingshandleiding]({custom_oid_guide_url})**\n\nOverschrijf de LLDP-OID's voor dit apparaat. Laat deze velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Bestaande database-items:\n{existing_entries}",
+        "title": "LLDP overschrijven"
+      },
+      "override_fdb": {
+        "data": {
+          "vendor": "Leverancier (Merk)",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID werkt zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "oid_fdb_port": "FDB-poort OID (Bridge-MIB)",
+          "oid_q_fdb_port": "Q-FDB-poort OID (Q-BRIDGE-MIB)"
+        },
+        "description": "👉 **[📘 Lees FDB Overschrijvingshandleiding]({custom_oid_guide_url})**\n\nOverschrijf de forwarding database (FDB) OID's voor dit apparaat. Laat deze velden leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Bestaande database-items:\n{existing_entries}",
+        "title": "FDB overschrijven"
+      },
+      "override_arp": {
+        "data": {
+          "vendor": "Leverancier (Merk)",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID werkt zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "oid_arp_mac": "ARP OID (IP-MIB)"
+        },
+        "description": "👉 **[📘 Lees ARP Overschrijvingshandleiding]({custom_oid_guide_url})**\n\nOverschrijf de ARP OID voor dit apparaat. Laat dit veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Bestaande database-items:\n{existing_entries}",
+        "title": "ARP overschrijven"
+      },
+      "override_base_mac": {
+        "data": {
+          "vendor": "Leverancier (Merk)",
+          "description": "Beschrijving",
+          "attestation": "Ik verklaar dat ik heb getest en geverifieerd dat deze OID werkt zoals verwacht.",
+          "share_with_community": "Deel dit met de community",
+          "back_to_menu": "Teruggaan (wijzigingen weggooien)",
+          "oid_base_mac": "Basis Bridge MAC OID (Bridge-MIB)"
+        },
+        "description": "👉 **[📘 Lees Basis MAC Overschrijvingshandleiding]({custom_oid_guide_url})**\n\nOverschrijf de Basis MAC OID voor dit apparaat. Laat dit veld leeg om automatische detectie te gebruiken of om een bestaande overschrijving te wissen.\n\n### Bestaande database-items:\n{existing_entries}",
+        "title": "Basis-MAC overschrijven"
+      }
+    }
+  },
+  "selector": {
+    "bandwidth_data_as": {
+      "options": {
+        "attributes": "Attributen (geen geschiedenis)",
+        "sensors": "Sensoren (geschiedenis)"
+      }
+    },
+    "env_data_as": {
+      "options": {
+        "attributes": "Attributen (geen geschiedenis)",
+        "sensors": "Sensoren (geschiedenis)"
+      }
+    },
+    "poe_data_as": {
+      "options": {
+        "attributes": "Attributen (geen geschiedenis)",
+        "sensors": "Sensoren (geschiedenis)"
+      }
+    }
+  },
+  "title": "SNMP Switch Manager"
+}

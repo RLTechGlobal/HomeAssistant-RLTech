@@ -1,0 +1,152 @@
+{
+  "interface_filters": [
+    {
+      "id": "generic_skip_cpu_interface",
+      "label": "Generic: Skip CPU pseudo-interface (IF-MIB name 'CPU')",
+      "vendors": [
+        "Standard"
+      ],
+      "rule_type": "exclude",
+      "match_type": "equals",
+      "match_value": "cpu"
+    },
+    {
+      "id": "cisco_sg_physical_fa_gi",
+      "label": "Cisco SG: Only create physical Fa*/Gi* interfaces",
+      "vendors": [
+        "Cisco"
+      ],
+      "vendor_keywords": ["sg"],
+      "rule_type": "include",
+      "match_type": "starts_with",
+      "match_value": [
+        "fa",
+        "gi"
+      ],
+      "oper_not_equal": 6
+    },
+    {
+      "id": "cisco_sg_vlan_admin_or_oper",
+      "label": "Cisco SG: Create VLAN interfaces (oper up or admin down)",
+      "vendors": [
+        "Cisco"
+      ],
+      "vendor_keywords": ["sg"],
+      "rule_type": "include",
+      "conditions": [
+        {
+          "match_type": "is_digit",
+          "oper_in": [1],
+          "admin_in": [2],
+          "oper_or_admin_match": true,
+          "require_ip": true,
+          "rename_prefix": "VLAN "
+        },
+        {
+          "match_type": "starts_with",
+          "match_value": "vlan",
+          "admin_in": [
+            1,
+            2
+          ],
+          "oper_in": [
+            1,
+            2,
+            6,
+            7
+          ]
+        },
+        {
+          "match_type": "starts_with",
+          "match_value": "po",
+          "oper_in": [1],
+          "admin_in": [2],
+          "oper_or_admin_match": true
+        }
+      ]
+    },
+    {
+      "id": "cisco_sg_other_has_ip",
+      "label": "Cisco SG: Create other interfaces when an IP is configured",
+      "vendors": [
+        "Cisco"
+      ],
+      "vendor_keywords": ["sg"],
+      "rule_type": "include",
+      "require_ip": true
+    },
+    {
+      "id": "junos_physical_ge",
+      "label": "Junos: Create physical ge-0/0/X interfaces",
+      "vendors": [
+        "Junos"
+      ],
+      "rule_type": "include",
+      "match_type": "starts_with",
+      "match_value": "ge-",
+      "exclude_contains": "."
+    },
+    {
+      "id": "junos_l3_subif_has_ip",
+      "label": "Junos: Create ge-0/0/X.Y subinterfaces with IP (non-.0)",
+      "vendors": [
+        "Junos"
+      ],
+      "rule_type": "include",
+      "match_type": "starts_with",
+      "match_value": "ge-",
+      "require_contains": ".",
+      "exclude_ends_with": ".0",
+      "require_ip": true
+    },
+    {
+      "id": "junos_vlan_admin_or_oper",
+      "label": "Junos: Create VLAN interfaces (oper up or admin down)",
+      "vendors": [
+        "Junos"
+      ],
+      "rule_type": "include",
+      "match_type": "starts_with",
+      "match_value": "vlan",
+      "admin_in": [
+        1,
+        2
+      ],
+      "oper_in": [
+        1,
+        2,
+        6,
+        7
+      ]
+    },
+    {
+      "id": "junos_other_has_ip",
+      "label": "Junos: Create other interfaces when an IP is configured",
+      "vendors": [
+        "Junos"
+      ],
+      "rule_type": "include",
+      "require_ip": true
+    },
+    {
+      "id": "skip_pfsense_enc_interfaces",
+      "label": "Skip pfSense Enc Interfaces",
+      "vendors": [
+        "pfSense"
+      ],
+      "rule_type": "exclude",
+      "match_type": "starts_with",
+      "match_value": "enc"
+    },
+    {
+      "id": "skip_pfsense_pf_interfaces",
+      "label": "Skip pfSense Pf Interfaces",
+      "vendors": [
+        "pfSense"
+      ],
+      "rule_type": "exclude",
+      "match_type": "starts_with",
+      "match_value": "pf"
+    }
+  ]
+}

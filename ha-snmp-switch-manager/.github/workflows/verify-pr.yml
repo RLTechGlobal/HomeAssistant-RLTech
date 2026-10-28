@@ -1,0 +1,86 @@
+name: PR Verification & Auto-Merge
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feature/modular-refactor
+    paths:
+      - 'custom_components/snmp_switch_manager/database/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Verification & Self-Healing Script
+        run: python .github/scripts/verify_pr.py
+
+      - name: Commit and Push Self-Healing Adjustments
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "✨ Database corrections or compiled vendors.json detected! Auto-committing changes..."
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add custom_components/snmp_switch_manager/database/
+            git commit -m "Auto-normalize database layout and vendors.json compilation [skip ci]"
+            git push
+          else
+            echo "✅ All database files are fully normalized and correct!"
+          fi
+
+      - name: Automatically Merge Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Attempting to merge Pull Request #${{ github.event.pull_request.number }}..."
+          
+          # Try using GitHub CLI first
+          if gh pr merge ${{ github.event.pull_request.number }} --merge --delete-branch; then
+            echo "✅ PR merged successfully via GitHub API!"
+          else
+            echo "⚠️ GitHub CLI merge failed. Falling back to direct Git merge and push..."
+            
+            # Configure Git identity if not already set
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            
+            # Fetch base branch and head refs from remote origin
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+            git fetch origin $BASE_BRANCH
+            git fetch origin ${{ github.event.pull_request.head.ref }}
+            
+            # Checkout and update the base branch
+            git checkout -B $BASE_BRANCH origin/$BASE_BRANCH
+            
+            # Merge the PR head branch locally
+            git merge origin/${{ github.event.pull_request.head.ref }} --no-edit --allow-unrelated-histories
+            
+            # Push the merged base branch back to origin
+            if git push origin $BASE_BRANCH; then
+              echo "✅ PR merged successfully via Git push fallback!"
+              
+              # Delete the head branch remotely if possible
+              git push origin --delete ${{ github.event.pull_request.head.ref }} || true
+            else
+              echo "❌ Direct Git merge fallback push failed!"
+              exit 1
+            fi
+          fi
+
